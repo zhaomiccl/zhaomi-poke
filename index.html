@@ -698,6 +698,37 @@ body::before {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
 
+/* 海报画廊导航按钮 */
+.poster-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 28px;
+  color: #dc2430;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding-bottom: 4px;
+  transition: all 0.3s;
+}
+
+.poster-nav:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.poster-nav.prev { left: -10px; }
+.poster-nav.next { right: -10px; }
+
 /* 小屏适配 */
 @media (max-height: 650px) {
   .title-main { font-size: 42px; }
@@ -738,7 +769,8 @@ body::before {
   </div>
 </div>
 
-<button class="admin-btn" onclick="showAdminLogin()">⚙ 管 理 员</button>
+<button class="admin-btn" onclick="showPosterGallery()">🎨 中 奖 海 报</button>
+<button class="admin-btn" onclick="showAdminLogin()" style="margin-top: 8px;">⚙ 管 理 员</button>
 
 <!-- 管理员登录弹窗 -->
 <div class="modal" id="adminLoginModal">
@@ -813,22 +845,26 @@ body::before {
     <h2 id="resultTitle">🎉</h2>
     <p id="resultText"></p>
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-      <button onclick="generatePoster()" style="background: linear-gradient(135deg, #9333ea, #c026d3); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.35);">✨ 生成海报</button>
+      <button onclick="showCurrentPoster()" style="background: linear-gradient(135deg, #9333ea, #c026d3); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.35);">✨ 生成海报</button>
       <button onclick="closeModal('resultModal')">好 的</button>
     </div>
   </div>
 </div>
 
-<!-- 海报预览弹窗 -->
+<!-- 海报画廊弹窗 -->
 <div class="modal" id="posterModal">
-  <div class="modal-content" style="text-align:center; padding: 20px;">
-    <h2 style="margin-bottom: 15px;">🎊 中奖海报</h2>
-    <div id="posterContainer" style="margin: 10px 0;">
+  <div class="modal-content" style="text-align:center; padding: 20px; max-width: 500px;">
+    <h2 style="margin-bottom: 10px;">🎊 我的中奖海报</h2>
+    <p style="font-size:13px; color:#888; margin-bottom:10px;" id="posterCount">共 0 张</p>
+    <div id="posterContainer" style="margin: 10px 0; position: relative;">
       <canvas id="posterCanvas" style="max-width:100%; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"></canvas>
+      <button class="poster-nav prev" onclick="prevPoster()" style="display:none;">‹</button>
+      <button class="poster-nav next" onclick="nextPoster()" style="display:none;">›</button>
     </div>
-    <p style="font-size:12px; color:#999; margin: 10px 0;">长按图片保存，或点击下方按钮下载</p>
+    <p style="font-size:12px; color:#999; margin: 10px 0;">长按图片保存，或使用下方按钮</p>
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-      <button onclick="downloadPoster()" style="background: linear-gradient(135deg, #dc2430, #ff6b81);">📥 保存海报</button>
+      <button onclick="downloadPoster()" style="background: linear-gradient(135deg, #dc2430, #ff6b81);">📥 保存当前</button>
+      <button onclick="downloadAllPosters()" id="downloadAllBtn" style="background: linear-gradient(135deg, #9333ea, #c026d3); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.35); display:none;">📦 全部保存</button>
       <button onclick="closeModal('posterModal')" style="background: linear-gradient(135deg, #aaa, #bbb); box-shadow: none;">关闭</button>
     </div>
   </div>
@@ -1134,7 +1170,67 @@ function escapeHtml(text) {
 }
 
 // ====== 海报生成 ======
-function generatePoster() {
+let posterList = [];
+let currentPosterIndex = 0;
+
+function showPosterGallery() {
+  if (!currentData) { showToast('数据加载中...'); return; }
+  
+  // 收集所有中奖记录
+  posterList = [];
+  for (let i = 0; i < currentData.opened.length; i++) {
+    if (currentData.opened[i]) {
+      posterList.push({
+        gift: currentData.gifts[i] || '空',
+        code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
+        cell: i + 1
+      });
+    }
+  }
+  
+  if (posterList.length === 0) {
+    showToast('还没有中奖记录哦～');
+    return;
+  }
+  
+  currentPosterIndex = 0;
+  document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 1 张`;
+  
+  // 显示/隐藏导航按钮
+  const prevBtn = document.querySelector('.poster-nav.prev');
+  const nextBtn = document.querySelector('.poster-nav.next');
+  const allBtn = document.getElementById('downloadAllBtn');
+  
+  if (posterList.length > 1) {
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    allBtn.style.display = 'inline-block';
+  } else {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    allBtn.style.display = 'none';
+  }
+  
+  generatePoster(0);
+  showModal('posterModal');
+}
+
+function prevPoster() {
+  if (posterList.length === 0) return;
+  currentPosterIndex = (currentPosterIndex - 1 + posterList.length) % posterList.length;
+  generatePoster(currentPosterIndex);
+  document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 ${currentPosterIndex + 1} 张`;
+}
+
+function nextPoster() {
+  if (posterList.length === 0) return;
+  currentPosterIndex = (currentPosterIndex + 1) % posterList.length;
+  generatePoster(currentPosterIndex);
+  document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 ${currentPosterIndex + 1} 张`;
+}
+
+function generatePoster(index) {
+  const prize = posterList[index];
   const canvas = document.getElementById('posterCanvas');
   const ctx = canvas.getContext('2d');
   
@@ -1259,14 +1355,13 @@ function generatePoster() {
   ctx.shadowColor = 'rgba(255, 77, 109, 0.5)';
   ctx.shadowBlur = 15;
   
-  const giftText = lastPrize.gift || '神秘奖品';
-  // 处理长文本换行
-  if (giftText.length > 8) {
-    ctx.font = 'bold 42px "PingFang SC", "Microsoft YaHei", sans-serif';
-  }
-  if (giftText.length > 12) {
-    ctx.font = 'bold 36px "PingFang SC", "Microsoft YaHei", sans-serif';
-  }
+  const giftText = prize.gift || '神秘奖品';
+  // 处理长文本
+  let fontSize = 56;
+  if (giftText.length > 8) fontSize = 42;
+  if (giftText.length > 12) fontSize = 36;
+  if (giftText.length > 16) fontSize = 30;
+  ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
   ctx.fillText(giftText, W/2, cardY + 130);
   ctx.restore();
   
@@ -1283,14 +1378,14 @@ function generatePoster() {
   ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.fillText(`中奖人：${lastPrize.code}`, W/2, cardY + 270);
+  ctx.fillText(`中奖人：${prize.code}`, W/2, cardY + 270);
   ctx.restore();
   
   ctx.save();
   ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  ctx.fillText(`第 ${lastPrize.cell} 格 · ${new Date().toLocaleDateString('zh-CN')}`, W/2, cardY + 320);
+  ctx.fillText(`第 ${prize.cell} 格 · ${new Date().toLocaleDateString('zh-CN')}`, W/2, cardY + 320);
   ctx.restore();
   
   // 12. 底部装饰
@@ -1313,9 +1408,6 @@ function generatePoster() {
   drawCorner(ctx, W - 30, 30, 2);
   drawCorner(ctx, 30, H - 30, 3);
   drawCorner(ctx, W - 30, H - 30, 4);
-  
-  // 显示海报弹窗
-  showModal('posterModal');
 }
 
 function drawStars(ctx, W, H, count) {
@@ -1378,11 +1470,34 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function downloadPoster() {
   const canvas = document.getElementById('posterCanvas');
+  const prize = posterList[currentPosterIndex];
   const link = document.createElement('a');
-  link.download = `着迷戳戳乐_${lastPrize.gift || '中奖海报'}_${Date.now()}.png`;
+  link.download = `着迷戳戳乐_${prize.gift || '中奖海报'}_第${prize.cell}格.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
   showToast('海报已保存～');
+}
+
+async function downloadAllPosters() {
+  if (posterList.length === 0) return;
+  
+  showToast(`正在生成 ${posterList.length} 张海报...`);
+  
+  const canvas = document.getElementById('posterCanvas');
+  for (let i = 0; i < posterList.length; i++) {
+    generatePoster(i);
+    await new Promise(r => setTimeout(r, 300));
+    const prize = posterList[i];
+    const link = document.createElement('a');
+    link.download = `着迷戳戳乐_${prize.gift || '中奖'}_第${prize.cell}格.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    await new Promise(r => setTimeout(r, 500));
+  }
+  
+  // 回到当前张
+  generatePoster(currentPosterIndex);
+  showToast('全部海报已保存！');
 }
 
 // ====== 操作 ======
@@ -1457,6 +1572,52 @@ async function doPoke(index, code) {
     document.getElementById('resultText').textContent = gift;
     showModal('resultModal');
   }, 350);
+}
+
+function showCurrentPoster() {
+  closeModal('resultModal');
+  // 打开画廊并定位到当前中奖的这张
+  if (!currentData) { showToast('数据加载中...'); return; }
+  
+  posterList = [];
+  let targetIndex = 0;
+  for (let i = 0; i < currentData.opened.length; i++) {
+    if (currentData.opened[i]) {
+      posterList.push({
+        gift: currentData.gifts[i] || '空',
+        code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
+        cell: i + 1
+      });
+      if (i + 1 === lastPrize.cell) {
+        targetIndex = posterList.length - 1;
+      }
+    }
+  }
+  
+  if (posterList.length === 0) {
+    showToast('还没有中奖记录哦～');
+    return;
+  }
+  
+  currentPosterIndex = targetIndex;
+  document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 ${targetIndex + 1} 张`;
+  
+  const prevBtn = document.querySelector('.poster-nav.prev');
+  const nextBtn = document.querySelector('.poster-nav.next');
+  const allBtn = document.getElementById('downloadAllBtn');
+  
+  if (posterList.length > 1) {
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    allBtn.style.display = 'inline-block';
+  } else {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    allBtn.style.display = 'none';
+  }
+  
+  generatePoster(targetIndex);
+  showModal('posterModal');
 }
 
 // ====== 管理员功能 ======
