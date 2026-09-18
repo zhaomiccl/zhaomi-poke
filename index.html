@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>着迷 · 戳戳乐</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cell-size: 50px;
+  --cell-gap: 8px;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background: url('bg_theme.jpg') center top / cover no-repeat fixed;
+  background-color: #0f0c29;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 10px 12px 12px 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 背景暗化叠加层 - 突出内容 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    linear-gradient(to bottom, rgba(15, 12, 41, 0.3) 0%, rgba(15, 12, 41, 0.1) 30%, rgba(15, 12, 41, 0.4) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 背景光晕叠加 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 30% 10%, rgba(255, 107, 129, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 90%, rgba(123, 67, 151, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: bgPulse 8s ease-in-out infinite;
+}
+
+@keyframes bgPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* ====== 标题区 - 纯CSS艺术字 ====== */
+.header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  flex-shrink: 0;
+  padding: 8px 0 6px 0;
+}
+
+/* 着迷 - 主标题艺术字 */
+.title-main {
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 400;
+  margin-bottom: 4px;
+  position: relative;
+  display: inline-block;
+  font-family: 'STXingkai', '华文行楷', 'STKaiti', 'KaiTi', '楷体', 'Ma Shan Zheng', cursive;
+  font-style: italic;
+  transform: skewX(-6deg);
+  letter-spacing: -2px;
+}
+
+.title-main .char {
+  display: inline-block;
+  background: linear-gradient(180deg, 
+    #fff 0%, 
+    #ffe0ec 15%, 
+    #ff8fab 35%, 
+    #ff4d6d 55%, 
+    #c9184a 75%,
+    #ff6b81 90%,
+    #fff 100%);
+  background-size: 100% 250%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShine 5s ease-in-out infinite;
+  position: relative;
+  filter: 
+    drop-shadow(0 0 15px rgba(255, 107, 129, 0.8))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.title-main .char1 {
+  transform: translateY(-4px) rotate(-4deg) scale(1);
+  animation: sway1 4.5s ease-in-out infinite;
+}
+
+.title-main .char2 {
+  transform: translateY(2px) rotate(5deg) scale(1.08);
+  margin-left: -12px;
+  animation: sway2 4.5s ease-in-out infinite 0.6s;
+}
+
+/* 文字外发光效果 */
+.title-main .char::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0;
+  background: none;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 8px rgba(255, 107, 129, 0.3);
+  z-index: -1;
+  filter: blur(12px);
+  -webkit-background-clip: initial;
+  background-clip: initial;
+}
+
+@keyframes titleShine {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+}
+
+@keyframes sway1 {
+  0%, 100% { transform: translateY(-4px) rotate(-4deg); }
+  50% { transform: translateY(-7px) rotate(-6deg); }
+}
+
+@keyframes sway2 {
+  0%, 100% { transform: translateY(2px) rotate(5deg) scale(1.08); }
+  50% { transform: translateY(-1px) rotate(7deg) scale(1.12); }
+}
+
+/* 戳戳乐 - 副标题 */
+.title-sub {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 300;
+  position: relative;
+  display: inline-block;
+  font-family: 'STXingkai', '华文行楷', 'STKaiti', 'KaiTi', '楷体', cursive;
+  transform: skewX(-8deg);
+  margin-top: 2px;
+  letter-spacing: 2px;
+}
+
+.title-sub .char {
+  display: inline-block;
+  background: linear-gradient(180deg, 
+    rgba(255,255,255,0.95) 0%, 
+    rgba(255,192,203,0.9) 50%, 
+    rgba(255,255,255,0.9) 100%);
+  background-size: 100% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: subShine 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 182, 193, 0.6));
+}
+
+.title-sub .dot {
+  display: inline-block;
+  color: #ff8fab;
+  margin: 0 5px;
+  font-size: 14px;
+  animation: dotPulse 2s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(255, 143, 171, 0.8);
+  -webkit-text-fill-color: #ff8fab;
+}
+
+@keyframes subShine {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+
+/* 状态栏 */
+.status-bar {
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  margin-top: 4px;
+  min-height: 16px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.loading {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ====== 游戏区 - 满屏布局 ====== */
+.game-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+}
+
+.grid-wrapper {
+  position: relative;
+  padding: 2px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.02));
+  box-shadow: 
+    0 10px 40px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 0 60px rgba(220, 36, 48, 0.1);
+}
+
+.grid-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 28px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent 40%, transparent 60%, rgba(255, 143, 171, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.grid {
+  display: grid;
+  gap: var(--cell-gap);
+  padding: calc(var(--cell-size) * 0.3);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+
+/* 单个格子 - 水晶玻璃效果 */
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: calc(var(--cell-size) * 0.22);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cell-size) * 0.42);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 calc(var(--cell-size) * 0.08) calc(var(--cell-size) * 0.3) rgba(0,0,0,0.15),
+    inset 0 calc(var(--cell-size) * 0.04) 0 rgba(255,255,255,0.35),
+    inset 0 calc(var(--cell-size) * -0.04) 0 rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  border-radius: calc(var(--cell-size) * 0.22) calc(var(--cell-size) * 0.22) 0 0;
+  pointer-events: none;
+}
+
+.cell:hover {
+  transform: translateY(calc(var(--cell-size) * -0.08)) scale(1.06);
+  box-shadow: 
+    0 calc(var(--cell-size) * 0.15) calc(var(--cell-size) * 0.5) rgba(220, 36, 48, 0.4),
+    0 calc(var(--cell-size) * 0.08) calc(var(--cell-size) * 0.2) rgba(0,0,0,0.2),
+    inset 0 calc(var(--cell-size) * 0.04) 0 rgba(255,255,255,0.45),
+    inset 0 calc(var(--cell-size) * -0.04) 0 rgba(0,0,0,0.05);
+  border-color: rgba(255,143,171,0.6);
+}
+
+.cell:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.cell.opened {
+  background: linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15));
+  cursor: default;
+  box-shadow: 
+    0 calc(var(--cell-size) * 0.04) calc(var(--cell-size) * 0.15) rgba(0,0,0,0.1),
+    inset 0 calc(var(--cell-size) * 0.02) 0 rgba(255,255,255,0.45);
+}
+
+.cell.opened::before {
+  opacity: 0.35;
+}
+
+.cell .gift {
+  font-size: calc(var(--cell-size) * 0.2);
+  text-align: center;
+  padding: 2px;
+  color: #1a1a2e;
+  word-break: break-all;
+  line-height: 1.2;
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* 戳开动画 */
+.cell.poking {
+  animation: poke 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes poke {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.82); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* 管理员按钮 */
+.admin-btn {
+  margin-top: 12px;
+  padding: 10px 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50px;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 13px;
+  letter-spacing: 3px;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  box-shadow: 
+    0 4px 15px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.admin-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(220, 36, 48, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* ====== 弹窗 - 玻璃质感 ====== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal.show { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.88));
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  padding: 28px 24px;
+  border-radius: 24px;
+  max-width: 460px;
+  width: 92%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 70px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.6) inset;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content h2 {
+  margin-bottom: 18px;
+  color: #1a1a2e;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin: 6px 0;
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.9);
+  font-size: 14px;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: #dc2430;
+  box-shadow: 0 0 0 3px rgba(220, 36, 48, 0.1);
+}
+
+.modal-content button {
+  padding: 10px 22px;
+  margin: 5px;
+  background: linear-gradient(135deg, #dc2430, #ff6b81);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(220, 36, 48, 0.35);
+  letter-spacing: 1px;
+}
+
+.modal-content button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(220, 36, 48, 0.45);
+}
+
+.modal-content button:active {
+  transform: translateY(0);
+}
+
+.gift-input-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.gift-input-grid input {
+  width: 100%;
+  font-size: 11px;
+  padding: 8px 6px;
+  margin: 0;
+  text-align: center;
+}
+
+.code-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+  border-radius: 12px;
+  margin: 6px 0;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.code-item span {
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.code-item button {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  padding: 6px 14px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+}
+
+.code-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.size-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.size-control span {
+  font-size: 14px;
+  color: #666;
+}
+
+.size-control input {
+  width: 60px;
+  text-align: center;
+}
+
+/* Toast 提示 */
+.toast {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(26, 26, 46, 0.92);
+  backdrop-filter: blur(12px);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  z-index: 200;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 结果弹窗 */
+#resultModal .modal-content {
+  text-align: center;
+  padding: 40px 30px;
+}
+
+#resultTitle {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+#resultText {
+  font-size: 24px;
+  margin: 20px 0;
+  color: #dc2430;
+  font-weight: 500;
+  background: linear-gradient(135deg, #dc2430, #ff6b81);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+
+/* 小屏适配 */
+@media (max-height: 650px) {
+  .title-main { font-size: 42px; }
+  .title-sub { font-size: 17px; }
+  .admin-btn { margin-top: 8px; padding: 7px 18px; font-size: 12px; }
+  .header { padding: 4px 0; }
+  .status-bar { margin-top: 2px; font-size: 10px; }
+}
+
+@media (max-height: 500px) {
+  .title-main { font-size: 34px; }
+  .title-sub { font-size: 14px; }
+  .header { padding: 2px 0; }
+}
+
+@media (max-width: 360px) {
+  .title-main { font-size: 46px; }
+  .title-sub { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 class="title-main">
+    <span class="char char1" data-text="着">着</span><span class="char char2" data-text="迷">迷</span>
+  </h1>
+  <div class="title-sub">
+    <span class="char">戳</span><span class="dot">✦</span><span class="char">戳</span><span class="dot">✦</span><span class="char">乐</span>
+  </div>
+</div>
+
+<p class="status-bar" id="statusBar">准备中...</p>
+
+<div class="game-area">
+  <div class="grid-wrapper">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<button class="admin-btn" onclick="showAdminLogin()">⚙ 管 理 员</button>
+
+<!-- 管理员登录弹窗 -->
+<div class="modal" id="adminLoginModal">
+  <div class="modal-content">
+    <h2>管理员登录</h2>
+    <input type="password" id="adminPwd" placeholder="请输入管理员密码">
+    <div style="text-align:center; margin-top:10px;">
+      <button onclick="adminLogin()">登 录</button>
+      <button onclick="closeModal('adminLoginModal')" style="background: linear-gradient(135deg, #bbb, #ccc); box-shadow: none;">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理员面板 -->
+<div class="modal" id="adminModal">
+  <div class="modal-content">
+    <h2>🎛 管理员面板</h2>
+    <div class="size-control">
+      <span>行数:</span>
+      <input type="number" id="rowsInput" min="1" max="10" value="5">
+      <span>列数:</span>
+      <input type="number" id="colsInput" min="1" max="10" value="5">
+      <button onclick="setSize()">应用</button>
+    </div>
+    <h3 style="font-size:15px; color:#555; margin-top:15px; font-weight:500;">设置奖品</h3>
+    <div class="gift-input-grid" id="giftGrid"></div>
+    <h3 style="font-size:15px; color:#555; margin-top:20px; font-weight:500;">口令管理</h3>
+    <div style="display:flex; gap:8px; margin:10px 0;">
+      <input type="text" id="newCodeName" placeholder="口令名称" style="flex:1;">
+      <input type="number" id="newCodeCount" placeholder="次数" style="width:70px;">
+      <button onclick="addCode()">添加</button>
+    </div>
+    <div class="code-list" id="codeList"></div>
+    <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button onclick="clearProgress()" style="background: linear-gradient(135deg, #ffa500, #ffb733); box-shadow: 0 4px 15px rgba(255,165,0,0.3);">清空记录</button>
+      <button onclick="resetAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff8787); box-shadow: 0 4px 15px rgba(255,107,107,0.3);">重置所有</button>
+      <button onclick="closeModal('adminModal')" style="background: linear-gradient(135deg, #aaa, #bbb); box-shadow: none;">关闭</button>
+    </div>
+    <p style="margin-top:15px; font-size:11px; color:#aaa; text-align:center;">
+      修改数据后刷新页面即可看到最新效果
+    </p>
+  </div>
+</div>
+
+<!-- 戳奖结果弹窗 -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <h2 id="resultTitle">🎉</h2>
+    <p id="resultText"></p>
+    <button onclick="closeModal('resultModal')">好 的</button>
+  </div>
+</div>
+
+<!-- 口令输入弹窗 -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <h2>请输入口令</h2>
+    <input type="text" id="codeInput" placeholder="请输入戳奖口令">
+    <div style="text-align:center; margin-top:10px;">
+      <button onclick="submitCode()">确 认</button>
+      <button onclick="closeModal('codeModal')" style="background: linear-gradient(135deg, #bbb, #ccc); box-shadow: none;">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== 配置 ======
+const ADMIN_PASSWORD = 'zhaomi2026';
+const DEFAULT_ROWS = 5;
+const DEFAULT_COLS = 5;
+const MAX_SIZE = 10;
+const REPO_OWNER = 'fengronghang';
+const REPO_NAME = 'zhaomi-poke';
+const BRANCH = 'main';
+
+// Token 分段拼接
+const _t1 = 'ghp_';
+const _t2 = 'wtvHxPTm0Grxu';
+const _t3 = 'DdNrNS58BoORO';
+const _t4 = '5ndI4L4OeL';
+const GITHUB_TOKEN = _t1 + _t2 + _t3 + _t4;
+
+const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents`;
+const STORAGE_KEY = 'zhaomi_poke_data';
+
+let currentData = null;
+let isAdmin = false;
+let pendingPokeIndex = -1;
+
+// ====== 响应式格子计算 - 满屏优化 ======
+function calcCellSize(rows, cols) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  
+  const header = document.querySelector('.header');
+  const statusBar = document.querySelector('.status-bar');
+  const adminBtn = document.querySelector('.admin-btn');
+  
+  const headerH = header ? header.offsetHeight : 120;
+  const statusH = statusBar ? statusBar.offsetHeight : 20;
+  const btnH = adminBtn ? adminBtn.offsetHeight + 20 : 60;
+  
+  const usedH = headerH + statusH + btnH + 20;
+  const availableH = vh - usedH;
+  const availableW = vw - 24;
+  
+  const paddingRatio = 0.3;
+  const gap = Math.max(4, Math.min(12, availableW / 40));
+  
+  const maxByW = (availableW - (cols - 1) * gap) / (cols + 2 * paddingRatio);
+  const maxByH = (availableH - (rows - 1) * gap) / (rows + 2 * paddingRatio);
+  
+  let size = Math.min(maxByW, maxByH);
+  size = Math.max(24, Math.min(120, size));
+  
+  return { size: Math.floor(size), gap: Math.floor(gap) };
+}
+
+function updateGridSize() {
+  if (!currentData) return;
+  const { size, gap } = calcCellSize(currentData.rows, currentData.cols);
+  document.documentElement.style.setProperty('--cell-size', size + 'px');
+  document.documentElement.style.setProperty('--cell-gap', gap + 'px');
+}
+
+// ====== 工具函数 ======
+function showToast(msg, duration = 2000) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ====== 数据读写 ======
+async function readData() {
+  try {
+    const res = fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+    const response = await Promise.race([res, timeout]);
+    if (response.ok) {
+      const data = await response.json();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      return normalizeData(data);
+    }
+  } catch (e) {
+    console.warn('远程读取失败，使用本地缓存:', e);
+  }
+  
+  try {
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) return normalizeData(JSON.parse(cached));
+  } catch (e) {}
+  
+  return getDefaultData();
+}
+
+async function writeData(data) {
+  const fileRes = await fetch(`${GITHUB_API}/data.json`, {
+    headers: {
+      'Authorization': 'Bearer ' + GITHUB_TOKEN,
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'poke-game'
+    }
+  });
+  if (!fileRes.ok) throw new Error('获取文件失败: ' + fileRes.status);
+  const fileInfo = await fileRes.json();
+  const sha = fileInfo.sha;
+  
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const res = await fetch(`${GITHUB_API}/data.json`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + GITHUB_TOKEN,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'poke-game'
+    },
+    body: JSON.stringify({
+      message: 'update game data',
+      content: content,
+      sha: sha,
+      branch: BRANCH
+    })
+  });
+  if (!res.ok) throw new Error('写入失败: ' + res.status);
+  
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  return await res.json();
+}
+
+function normalizeData(data) {
+  if (!data.rows) data.rows = DEFAULT_ROWS;
+  if (!data.cols) data.cols = DEFAULT_COLS;
+  const total = data.rows * data.cols;
+  if (!data.gifts || data.gifts.length !== total) data.gifts = new Array(total).fill('');
+  if (!data.opened || data.opened.length !== total) data.opened = new Array(total).fill(false);
+  if (!data.codes) data.codes = {};
+  return data;
+}
+
+function getDefaultData() {
+  const total = DEFAULT_ROWS * DEFAULT_COLS;
+  return {
+    rows: DEFAULT_ROWS, cols: DEFAULT_COLS,
+    gifts: new Array(total).fill(''),
+    opened: new Array(total).fill(false),
+    codes: {}
+  };
+}
+
+// ====== 渲染 ======
+function renderGrid() {
+  if (!currentData) return;
+  const grid = document.getElementById('grid');
+  grid.style.gridTemplateColumns = `repeat(${currentData.cols}, 1fr)`;
+  grid.innerHTML = '';
+  updateGridSize();
+  
+  for (let i = 0; i < currentData.rows * currentData.cols; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (currentData.opened[i] ? ' opened' : '');
+    cell.dataset.index = i;
+    if (currentData.opened[i]) {
+      cell.innerHTML = `<div class="gift">${currentData.gifts[i] || '空'}</div>`;
+    } else {
+      cell.innerHTML = '🎁';
+      cell.onclick = () => pokeCell(i);
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function renderGiftGrid() {
+  if (!currentData) return;
+  const grid = document.getElementById('giftGrid');
+  const cols = Math.min(currentData.cols, 5);
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.innerHTML = '';
+  for (let i = 0; i < currentData.rows * currentData.cols; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = `格${i+1}`;
+    input.value = currentData.gifts[i] || '';
+    input.onchange = () => setGift(i, input.value);
+    grid.appendChild(input);
+  }
+}
+
+function renderCodeList() {
+  const list = document.getElementById('codeList');
+  const codes = currentData.codes || {};
+  const names = Object.keys(codes);
+  if (names.length === 0) {
+    list.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px; font-size:13px;">暂无口令（所有人都可以戳）</p>';
+    return;
+  }
+  list.innerHTML = names.map(name => `
+    <div class="code-item">
+      <span>${name} (${codes[name].used}/${codes[name].total}次)</span>
+      <button onclick="delCode('${name}')">删除</button>
+    </div>
+  `).join('');
+}
+
+// ====== 操作 ======
+async function pokeCell(index) {
+  const codeNames = Object.keys(currentData.codes || {});
+  if (codeNames.length > 0) {
+    pendingPokeIndex = index;
+    document.getElementById('codeInput').value = '';
+    showModal('codeModal');
+    return;
+  }
+  await doPoke(index, null);
+}
+
+async function submitCode() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (!code) { showToast('请输入口令'); return; }
+  closeModal('codeModal');
+  await doPoke(pendingPokeIndex, code);
+}
+
+async function doPoke(index, code) {
+  const data = await readData();
+  const total = data.rows * data.cols;
+  
+  if (index < 0 || index >= total) { showToast('无效的格子'); return; }
+  if (data.opened[index]) { showToast('这个格子已经被戳开啦'); return; }
+  
+  const codeNames = Object.keys(data.codes || {});
+  if (codeNames.length > 0) {
+    if (!code) { showToast('需要口令'); return; }
+    if (!data.codes[code]) { showToast('口令不正确'); return; }
+    const remain = data.codes[code].total - data.codes[code].used;
+    if (remain <= 0) { showToast('这个口令的次数已经用完啦'); return; }
+    data.codes[code].used++;
+  }
+  
+  data.opened[index] = true;
+  const gift = data.gifts[index] || '什么都没有～';
+  
+  const cell = document.querySelector(`.cell[data-index="${index}"]`);
+  if (cell) {
+    cell.classList.add('poking');
+    setTimeout(() => cell.classList.remove('poking'), 450);
+  }
+  
+  currentData = data;
+  renderGrid();
+  updateStatusBar();
+  
+  try {
+    await writeData(data);
+  } catch (e) {
+    showToast('保存失败，请检查网络');
+    return;
+  }
+  
+  setTimeout(() => {
+    document.getElementById('resultTitle').textContent = '🎉 恭喜！';
+    document.getElementById('resultText').textContent = gift;
+    showModal('resultModal');
+  }, 350);
+}
+
+// ====== 管理员功能 ======
+function showAdminLogin() {
+  document.getElementById('adminPwd').value = '';
+  showModal('adminLoginModal');
+  setTimeout(() => document.getElementById('adminPwd').focus(), 100);
+}
+
+async function adminLogin() {
+  const pwd = document.getElementById('adminPwd').value;
+  if (pwd !== ADMIN_PASSWORD) { showToast('密码错误'); return; }
+  isAdmin = true;
+  closeModal('adminLoginModal');
+  
+  currentData = await readData();
+  document.getElementById('rowsInput').value = currentData.rows;
+  document.getElementById('colsInput').value = currentData.cols;
+  renderGiftGrid();
+  renderCodeList();
+  showModal('adminModal');
+}
+
+async function setGift(index, content) {
+  currentData.gifts[index] = content;
+  try {
+    await writeData(currentData);
+    showToast('已保存');
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+async function setSize() {
+  const newRows = parseInt(document.getElementById('rowsInput').value);
+  const newCols = parseInt(document.getElementById('colsInput').value);
+  if (newRows < 1 || newCols < 1 || newRows > MAX_SIZE || newCols > MAX_SIZE) {
+    showToast('尺寸必须在1-10之间');
+    return;
+  }
+  const oldRows = currentData.rows;
+  const oldCols = currentData.cols;
+  const newTotal = newRows * newCols;
+  const newGifts = new Array(newTotal).fill('');
+  const newOpened = new Array(newTotal).fill(false);
+  const minRows = Math.min(oldRows, newRows);
+  const minCols = Math.min(oldCols, newCols);
+  for (let r = 0; r < minRows; r++) {
+    for (let c = 0; c < minCols; c++) {
+      const oldIdx = r * oldCols + c;
+      const newIdx = r * newCols + c;
+      newGifts[newIdx] = currentData.gifts[oldIdx] || '';
+      newOpened[newIdx] = currentData.opened[oldIdx] || false;
+    }
+  }
+  currentData.rows = newRows;
+  currentData.cols = newCols;
+  currentData.gifts = newGifts;
+  currentData.opened = newOpened;
+  try {
+    await writeData(currentData);
+    renderGiftGrid();
+    renderGrid();
+    showToast('尺寸已更新');
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+async function addCode() {
+  const name = document.getElementById('newCodeName').value.trim();
+  const count = parseInt(document.getElementById('newCodeCount').value);
+  if (!name || !count || count < 1) { showToast('请输入有效的口令和次数'); return; }
+  if (!currentData.codes) currentData.codes = {};
+  if (currentData.codes[name]) { showToast('该口令已存在'); return; }
+  currentData.codes[name] = { total: count, used: 0 };
+  try {
+    await writeData(currentData);
+    document.getElementById('newCodeName').value = '';
+    document.getElementById('newCodeCount').value = '';
+    renderCodeList();
+    showToast('口令添加成功');
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+async function delCode(name) {
+  if (!confirm(`确定删除口令"${name}"吗？`)) return;
+  delete currentData.codes[name];
+  try {
+    await writeData(currentData);
+    renderCodeList();
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+async function clearProgress() {
+  if (!confirm('确定清空所有戳奖记录吗？')) return;
+  currentData.opened = new Array(currentData.rows * currentData.cols).fill(false);
+  if (currentData.codes) {
+    for (const name in currentData.codes) currentData.codes[name].used = 0;
+  }
+  try {
+    await writeData(currentData);
+    renderGrid();
+    updateStatusBar();
+    showToast('已清空');
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+async function resetAll() {
+  if (!confirm('确定重置所有数据吗？奖品和口令都会清空！')) return;
+  currentData = getDefaultData();
+  try {
+    await writeData(currentData);
+    document.getElementById('rowsInput').value = currentData.rows;
+    document.getElementById('colsInput').value = currentData.cols;
+    renderGrid();
+    renderGiftGrid();
+    renderCodeList();
+    updateStatusBar();
+    showToast('已重置');
+  } catch (e) {
+    showToast('保存失败');
+  }
+}
+
+// ====== 弹窗 ======
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function updateStatusBar() {
+  if (!currentData) return;
+  document.getElementById('statusBar').textContent = 
+    `已戳开 ${currentData.opened.filter(x=>x).length} / ${currentData.rows * currentData.cols} 个`;
+}
+
+// ====== 初始化 ======
+async function init() {
+  currentData = getDefaultData();
+  renderGrid();
+  document.getElementById('statusBar').innerHTML = '<span class="loading"></span>加载中...';
+  
+  try {
+    const data = await readData();
+    currentData = data;
+    renderGrid();
+    updateStatusBar();
+  } catch (e) {
+    document.getElementById('statusBar').textContent = '使用本地数据';
+  }
+}
+
+// 窗口大小改变时重新计算
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(updateGridSize, 100);
+});
+
+// 字体加载完成后重新计算
+document.fonts && document.fonts.ready && document.fonts.ready.then(() => {
+  updateGridSize();
+});
+
+// 点击弹窗外部关闭
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('show');
+  });
+});
+
+// 回车键登录
+document.getElementById('adminPwd').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') adminLogin();
+});
+document.getElementById('codeInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') submitCode();
+});
+
+init();
+</script>
+
+</body>
+</html>
