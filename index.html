@@ -817,37 +817,52 @@ async function readData() {
 }
 
 async function writeData(data) {
-  const fileRes = await fetch(`${GITHUB_API}/data.json`, {
-    headers: {
-      'Authorization': 'Bearer ' + GITHUB_TOKEN,
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'poke-game'
+  // 最多重试3次，处理 SHA 冲突
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const fileRes = await fetch(`${GITHUB_API}/data.json`, {
+        headers: {
+          'Authorization': 'Bearer ' + GITHUB_TOKEN,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'poke-game'
+        }
+      });
+      if (!fileRes.ok) throw new Error('获取文件失败: ' + fileRes.status);
+      const fileInfo = await fileRes.json();
+      const sha = fileInfo.sha;
+      
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      const res = await fetch(`${GITHUB_API}/data.json`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + GITHUB_TOKEN,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'poke-game'
+        },
+        body: JSON.stringify({
+          message: 'update game data',
+          content: content,
+          sha: sha,
+          branch: BRANCH
+        })
+      });
+      
+      if (res.status === 409) {
+        // SHA 冲突，重试
+        await new Promise(r => setTimeout(r, 500));
+        continue;
+      }
+      
+      if (!res.ok) throw new Error('写入失败: ' + res.status);
+      
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      return await res.json();
+    } catch (e) {
+      if (attempt === 2) throw e;
+      await new Promise(r => setTimeout(r, 500));
     }
-  });
-  if (!fileRes.ok) throw new Error('获取文件失败: ' + fileRes.status);
-  const fileInfo = await fileRes.json();
-  const sha = fileInfo.sha;
-  
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-  const res = await fetch(`${GITHUB_API}/data.json`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + GITHUB_TOKEN,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'poke-game'
-    },
-    body: JSON.stringify({
-      message: 'update game data',
-      content: content,
-      sha: sha,
-      branch: BRANCH
-    })
-  });
-  if (!res.ok) throw new Error('写入失败: ' + res.status);
-  
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-  return await res.json();
+  }
 }
 
 function normalizeData(data) {
@@ -903,7 +918,7 @@ function renderGiftGrid() {
     input.type = 'text';
     input.placeholder = `格${i+1}`;
     input.value = currentData.gifts[i] || '';
-    input.onchange = () => setGift(i, input.value);
+    input.oninput = () => setGift(i, input.value);
     grid.appendChild(input);
   }
 }
@@ -972,12 +987,7 @@ async function doPoke(index, code) {
   renderGrid();
   updateStatusBar();
   
-  try {
-    await writeData(data);
-  } catch (e) {
-    showToast('保存失败，请检查网络');
-    return;
-  }
+  saveQueue = saveQueue.then(() => doSave());
   
   setTimeout(() => {
     document.getElementById('resultTitle').textContent = '🎉 恭喜！';
@@ -999,7 +1009,10 @@ async function adminLogin() {
   isAdmin = true;
   closeModal('adminLoginModal');
   
-  currentData = await readData();
+  // 用当前已加载的数据，不重新读取（避免读取失败覆盖掉已有数据）
+  if (!currentData) {
+    currentData = await readData();
+  }
   document.getElementById('rowsInput').value = currentData.rows;
   document.getElementById('colsInput').value = currentData.cols;
   renderGiftGrid();
@@ -1007,13 +1020,25 @@ async function adminLogin() {
   showModal('adminModal');
 }
 
-async function setGift(index, content) {
+let saveTimer = null;
+let saveQueue = Promise.resolve();
+
+function setGift(index, content) {
   currentData.gifts[index] = content;
+  // 防抖自动保存：停止输入 800ms 后保存
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveQueue = saveQueue.then(() => doSave('已自动保存'));
+  }, 800);
+}
+
+async function doSave(successMsg = '已保存') {
   try {
     await writeData(currentData);
-    showToast('已保存');
+    showToast(successMsg);
   } catch (e) {
-    showToast('保存失败');
+    showToast('保存失败，请稍后重试');
+    console.error('保存失败:', e);
   }
 }
 
@@ -1043,14 +1068,9 @@ async function setSize() {
   currentData.cols = newCols;
   currentData.gifts = newGifts;
   currentData.opened = newOpened;
-  try {
-    await writeData(currentData);
-    renderGiftGrid();
-    renderGrid();
-    showToast('尺寸已更新');
-  } catch (e) {
-    showToast('保存失败');
-  }
+  saveQueue = saveQueue.then(() => doSave('尺寸已更新'));
+  renderGiftGrid();
+  renderGrid();
 }
 
 async function addCode() {
@@ -1060,26 +1080,17 @@ async function addCode() {
   if (!currentData.codes) currentData.codes = {};
   if (currentData.codes[name]) { showToast('该口令已存在'); return; }
   currentData.codes[name] = { total: count, used: 0 };
-  try {
-    await writeData(currentData);
-    document.getElementById('newCodeName').value = '';
-    document.getElementById('newCodeCount').value = '';
-    renderCodeList();
-    showToast('口令添加成功');
-  } catch (e) {
-    showToast('保存失败');
-  }
+  saveQueue = saveQueue.then(() => doSave('口令添加成功'));
+  document.getElementById('newCodeName').value = '';
+  document.getElementById('newCodeCount').value = '';
+  renderCodeList();
 }
 
 async function delCode(name) {
   if (!confirm(`确定删除口令"${name}"吗？`)) return;
   delete currentData.codes[name];
-  try {
-    await writeData(currentData);
-    renderCodeList();
-  } catch (e) {
-    showToast('保存失败');
-  }
+  saveQueue = saveQueue.then(() => doSave('已删除'));
+  renderCodeList();
 }
 
 async function clearProgress() {
@@ -1088,31 +1099,21 @@ async function clearProgress() {
   if (currentData.codes) {
     for (const name in currentData.codes) currentData.codes[name].used = 0;
   }
-  try {
-    await writeData(currentData);
-    renderGrid();
-    updateStatusBar();
-    showToast('已清空');
-  } catch (e) {
-    showToast('保存失败');
-  }
+  saveQueue = saveQueue.then(() => doSave('已清空'));
+  renderGrid();
+  updateStatusBar();
 }
 
-async function resetAll() {
+function resetAll() {
   if (!confirm('确定重置所有数据吗？奖品和口令都会清空！')) return;
   currentData = getDefaultData();
-  try {
-    await writeData(currentData);
-    document.getElementById('rowsInput').value = currentData.rows;
-    document.getElementById('colsInput').value = currentData.cols;
-    renderGrid();
-    renderGiftGrid();
-    renderCodeList();
-    updateStatusBar();
-    showToast('已重置');
-  } catch (e) {
-    showToast('保存失败');
-  }
+  saveQueue = saveQueue.then(() => doSave('已重置'));
+  document.getElementById('rowsInput').value = currentData.rows;
+  document.getElementById('colsInput').value = currentData.cols;
+  renderGrid();
+  renderGiftGrid();
+  renderCodeList();
+  updateStatusBar();
 }
 
 // ====== 弹窗 ======
