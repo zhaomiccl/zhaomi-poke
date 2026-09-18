@@ -771,6 +771,29 @@ function showToast(msg, duration = 2000) {
 
 // ====== 数据读写 ======
 async function readData() {
+  // 优先从 GitHub API 读取（实时数据，和写入一致）
+  try {
+    const res = fetch(`${GITHUB_API}/data.json`, {
+      headers: {
+        'Authorization': 'Bearer ' + GITHUB_TOKEN,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'poke-game'
+      }
+    });
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+    const response = await Promise.race([res, timeout]);
+    if (response.ok) {
+      const fileInfo = await response.json();
+      const content = decodeURIComponent(escape(atob(fileInfo.content)));
+      const data = JSON.parse(content);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      return normalizeData(data);
+    }
+  } catch (e) {
+    console.warn('GitHub API读取失败，尝试CDN:', e);
+  }
+  
+  // 备用：从 Pages CDN 读取
   try {
     const res = fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
@@ -781,9 +804,10 @@ async function readData() {
       return normalizeData(data);
     }
   } catch (e) {
-    console.warn('远程读取失败，使用本地缓存:', e);
+    console.warn('CDN读取失败，使用本地缓存:', e);
   }
   
+  // 最后兜底：本地缓存
   try {
     const cached = localStorage.getItem(STORAGE_KEY);
     if (cached) return normalizeData(JSON.parse(cached));
