@@ -812,7 +812,25 @@ body::before {
   <div class="modal-content">
     <h2 id="resultTitle">🎉</h2>
     <p id="resultText"></p>
-    <button onclick="closeModal('resultModal')">好 的</button>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+      <button onclick="generatePoster()" style="background: linear-gradient(135deg, #9333ea, #c026d3); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.35);">✨ 生成海报</button>
+      <button onclick="closeModal('resultModal')">好 的</button>
+    </div>
+  </div>
+</div>
+
+<!-- 海报预览弹窗 -->
+<div class="modal" id="posterModal">
+  <div class="modal-content" style="text-align:center; padding: 20px;">
+    <h2 style="margin-bottom: 15px;">🎊 中奖海报</h2>
+    <div id="posterContainer" style="margin: 10px 0;">
+      <canvas id="posterCanvas" style="max-width:100%; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"></canvas>
+    </div>
+    <p style="font-size:12px; color:#999; margin: 10px 0;">长按图片保存，或点击下方按钮下载</p>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+      <button onclick="downloadPoster()" style="background: linear-gradient(135deg, #dc2430, #ff6b81);">📥 保存海报</button>
+      <button onclick="closeModal('posterModal')" style="background: linear-gradient(135deg, #aaa, #bbb); box-shadow: none;">关闭</button>
+    </div>
   </div>
 </div>
 
@@ -853,6 +871,7 @@ const STORAGE_KEY = 'zhaomi_poke_data';
 let currentData = null;
 let isAdmin = false;
 let pendingPokeIndex = -1;
+let lastPrize = { gift: '', code: '', cell: 0 };
 
 // ====== 响应式格子计算 - 满屏优化 ======
 function calcCellSize(rows, cols) {
@@ -1114,6 +1133,258 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// ====== 海报生成 ======
+function generatePoster() {
+  const canvas = document.getElementById('posterCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  // 设置画布大小 (高清)
+  const W = 750;
+  const H = 1200;
+  canvas.width = W;
+  canvas.height = H;
+  
+  // 1. 绘制渐变背景
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, '#1a0a2e');
+  bgGrad.addColorStop(0.4, '#2d1b4e');
+  bgGrad.addColorStop(0.7, '#4a1942');
+  bgGrad.addColorStop(1, '#1a0a2e');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+  
+  // 2. 绘制光晕装饰
+  const glow1 = ctx.createRadialGradient(W*0.2, H*0.15, 0, W*0.2, H*0.15, W*0.5);
+  glow1.addColorStop(0, 'rgba(255, 107, 129, 0.3)');
+  glow1.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, W, H);
+  
+  const glow2 = ctx.createRadialGradient(W*0.8, H*0.85, 0, W*0.8, H*0.85, W*0.5);
+  glow2.addColorStop(0, 'rgba(147, 51, 234, 0.35)');
+  glow2.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, W, H);
+  
+  // 3. 绘制星星装饰
+  drawStars(ctx, W, H, 50);
+  
+  // 4. 绘制顶部装饰线
+  ctx.strokeStyle = 'rgba(255, 200, 150, 0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(W*0.15, H*0.12);
+  ctx.lineTo(W*0.85, H*0.12);
+  ctx.stroke();
+  
+  // 5. 绘制主标题 "着迷"
+  ctx.save();
+  ctx.font = 'bold 140px "STXingkai", "华文行楷", "STKaiti", "KaiTi", cursive';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // 文字外发光
+  ctx.shadowColor = 'rgba(255, 107, 129, 0.8)';
+  ctx.shadowBlur = 30;
+  
+  // 渐变文字
+  const titleGrad = ctx.createLinearGradient(W/2, H*0.18, W/2, H*0.32);
+  titleGrad.addColorStop(0, '#fff');
+  titleGrad.addColorStop(0.3, '#ffe0ec');
+  titleGrad.addColorStop(0.5, '#ff8fab');
+  titleGrad.addColorStop(0.7, '#ff4d6d');
+  titleGrad.addColorStop(1, '#ff6b81');
+  ctx.fillStyle = titleGrad;
+  ctx.fillText('着 迷', W/2, H*0.25);
+  ctx.restore();
+  
+  // 6. 绘制副标题
+  ctx.save();
+  ctx.font = '32px "STXingkai", "华文行楷", cursive';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.shadowColor = 'rgba(255, 182, 193, 0.6)';
+  ctx.shadowBlur = 10;
+  ctx.fillText('✦ 戳 戳 乐 ✦', W/2, H*0.34);
+  ctx.restore();
+  
+  // 7. 绘制中间卡片（玻璃质感）
+  const cardX = W*0.1;
+  const cardY = H*0.4;
+  const cardW = W*0.8;
+  const cardH = H*0.38;
+  const cardR = 30;
+  
+  // 卡片阴影
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 10;
+  
+  // 卡片背景
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
+  cardGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+  cardGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+  ctx.fillStyle = cardGrad;
+  ctx.fill();
+  
+  // 卡片边框
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.lineWidth = 2;
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.stroke();
+  
+  // 8. "恭喜中奖" 文字
+  ctx.save();
+  ctx.font = 'bold 48px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffd700';
+  ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+  ctx.shadowBlur = 20;
+  ctx.fillText('🎉 恭 喜 中 奖 🎉', W/2, cardY + 70);
+  ctx.restore();
+  
+  // 9. 奖品名称
+  ctx.save();
+  ctx.font = 'bold 56px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  
+  const prizeGrad = ctx.createLinearGradient(W/2, cardY + 100, W/2, cardY + 200);
+  prizeGrad.addColorStop(0, '#fff');
+  prizeGrad.addColorStop(0.5, '#ffb3c1');
+  prizeGrad.addColorStop(1, '#ff4d6d');
+  ctx.fillStyle = prizeGrad;
+  ctx.shadowColor = 'rgba(255, 77, 109, 0.5)';
+  ctx.shadowBlur = 15;
+  
+  const giftText = lastPrize.gift || '神秘奖品';
+  // 处理长文本换行
+  if (giftText.length > 8) {
+    ctx.font = 'bold 42px "PingFang SC", "Microsoft YaHei", sans-serif';
+  }
+  if (giftText.length > 12) {
+    ctx.font = 'bold 36px "PingFang SC", "Microsoft YaHei", sans-serif';
+  }
+  ctx.fillText(giftText, W/2, cardY + 130);
+  ctx.restore();
+  
+  // 10. 分隔线
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 40, cardY + 230);
+  ctx.lineTo(cardX + cardW - 40, cardY + 230);
+  ctx.stroke();
+  
+  // 11. 中奖人信息
+  ctx.save();
+  ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.fillText(`中奖人：${lastPrize.code}`, W/2, cardY + 270);
+  ctx.restore();
+  
+  ctx.save();
+  ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillText(`第 ${lastPrize.cell} 格 · ${new Date().toLocaleDateString('zh-CN')}`, W/2, cardY + 320);
+  ctx.restore();
+  
+  // 12. 底部装饰
+  ctx.save();
+  ctx.font = '20px "PingFang SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillText('—— 着 迷 戳 戳 乐 ——', W/2, H*0.88);
+  ctx.restore();
+  
+  ctx.save();
+  ctx.font = '18px "PingFang SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.fillText('zhaomiccl.github.io/zhaomi-poke', W/2, H*0.92);
+  ctx.restore();
+  
+  // 13. 四角装饰
+  drawCorner(ctx, 30, 30, 1);
+  drawCorner(ctx, W - 30, 30, 2);
+  drawCorner(ctx, 30, H - 30, 3);
+  drawCorner(ctx, W - 30, H - 30, 4);
+  
+  // 显示海报弹窗
+  showModal('posterModal');
+}
+
+function drawStars(ctx, W, H, count) {
+  ctx.save();
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const size = Math.random() * 3 + 1;
+    const alpha = Math.random() * 0.5 + 0.3;
+    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawCorner(ctx, x, y, pos) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 200, 150, 0.6)';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  
+  const len = 30;
+  ctx.beginPath();
+  if (pos === 1) { // 左上
+    ctx.moveTo(x, y + len);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + len, y);
+  } else if (pos === 2) { // 右上
+    ctx.moveTo(x - len, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + len);
+  } else if (pos === 3) { // 左下
+    ctx.moveTo(x, y - len);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + len, y);
+  } else { // 右下
+    ctx.moveTo(x - len, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y - len);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadPoster() {
+  const canvas = document.getElementById('posterCanvas');
+  const link = document.createElement('a');
+  link.download = `着迷戳戳乐_${lastPrize.gift || '中奖海报'}_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('海报已保存～');
+}
+
 // ====== 操作 ======
 async function pokeCell(index) {
   const codeNames = Object.keys(currentData.codes || {});
@@ -1171,6 +1442,13 @@ async function doPoke(index, code) {
   currentData = data;
   renderGrid();
   updateStatusBar();
+  
+  // 保存最近中奖信息
+  lastPrize = {
+    gift: gift,
+    code: code || '匿名',
+    cell: index + 1
+  };
   
   saveQueue = saveQueue.then(() => doSave());
   
