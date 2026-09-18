@@ -518,6 +518,57 @@ body::before {
   overflow-y: auto;
 }
 
+/* 日志列表 */
+.log-list {
+  max-height: 250px;
+  overflow-y: auto;
+  margin: 10px 0;
+}
+
+.log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+  border-radius: 10px;
+  margin: 5px 0;
+  border: 1px solid rgba(0,0,0,0.05);
+  gap: 10px;
+}
+
+.log-item .log-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-item .log-code {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2430;
+  margin-bottom: 2px;
+}
+
+.log-item .log-prize {
+  font-size: 14px;
+  color: #1a1a2e;
+  word-break: break-all;
+}
+
+.log-item .log-time {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.log-item .log-cell {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 2px;
+}
+
 .size-control {
   display: flex;
   gap: 10px;
@@ -667,6 +718,12 @@ body::before {
       <button onclick="addCode()">添加</button>
     </div>
     <div class="code-list" id="codeList"></div>
+    <h3 style="font-size:15px; color:#555; margin-top:20px; font-weight:500;">📋 戳奖日志</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0;">
+      <span style="font-size:12px; color:#999;" id="logCount">共 0 条记录</span>
+      <button onclick="clearLogs()" style="padding:6px 14px; font-size:12px; background: linear-gradient(135deg, #ffa500, #ffb733); box-shadow: 0 2px 8px rgba(255,165,0,0.3);">清空日志</button>
+    </div>
+    <div class="log-list" id="logList"></div>
     <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
       <button onclick="clearProgress()" style="background: linear-gradient(135deg, #ffa500, #ffb733); box-shadow: 0 4px 15px rgba(255,165,0,0.3);">清空记录</button>
       <button onclick="resetAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff8787); box-shadow: 0 4px 15px rgba(255,107,107,0.3);">重置所有</button>
@@ -872,6 +929,7 @@ function normalizeData(data) {
   if (!data.gifts || data.gifts.length !== total) data.gifts = new Array(total).fill('');
   if (!data.opened || data.opened.length !== total) data.opened = new Array(total).fill(false);
   if (!data.codes) data.codes = {};
+  if (!data.logs) data.logs = [];
   return data;
 }
 
@@ -881,7 +939,8 @@ function getDefaultData() {
     rows: DEFAULT_ROWS, cols: DEFAULT_COLS,
     gifts: new Array(total).fill(''),
     opened: new Array(total).fill(false),
-    codes: {}
+    codes: {},
+    logs: []
   };
 }
 
@@ -939,6 +998,33 @@ function renderCodeList() {
   `).join('');
 }
 
+function renderLogList() {
+  const list = document.getElementById('logList');
+  const countEl = document.getElementById('logCount');
+  const logs = currentData.logs || [];
+  countEl.textContent = `共 ${logs.length} 条记录`;
+  if (logs.length === 0) {
+    list.innerHTML = '<p style="color:#aaa; text-align:center; padding:30px; font-size:13px;">暂无戳奖记录</p>';
+    return;
+  }
+  list.innerHTML = logs.map((log, i) => `
+    <div class="log-item">
+      <div class="log-info">
+        <div class="log-code">${escapeHtml(log.code)}</div>
+        <div class="log-prize">🎁 ${escapeHtml(log.prize)}</div>
+        <div class="log-cell">第 ${log.cell} 格</div>
+      </div>
+      <div class="log-time">${escapeHtml(log.time)}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 // ====== 操作 ======
 async function pokeCell(index) {
   const codeNames = Object.keys(currentData.codes || {});
@@ -976,6 +1062,15 @@ async function doPoke(index, code) {
   
   data.opened[index] = true;
   const gift = data.gifts[index] || '什么都没有～';
+  
+  // 记录日志
+  if (!data.logs) data.logs = [];
+  data.logs.unshift({
+    time: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+    code: code || '匿名',
+    prize: gift,
+    cell: index + 1
+  });
   
   const cell = document.querySelector(`.cell[data-index="${index}"]`);
   if (cell) {
@@ -1017,6 +1112,7 @@ async function adminLogin() {
   document.getElementById('colsInput').value = currentData.cols;
   renderGiftGrid();
   renderCodeList();
+  renderLogList();
   showModal('adminModal');
 }
 
@@ -1093,6 +1189,13 @@ async function delCode(name) {
   renderCodeList();
 }
 
+async function clearLogs() {
+  if (!confirm('确定清空所有戳奖日志吗？此操作不可恢复。')) return;
+  currentData.logs = [];
+  saveQueue = saveQueue.then(() => doSave('日志已清空'));
+  renderLogList();
+}
+
 async function clearProgress() {
   if (!confirm('确定清空所有戳奖记录吗？')) return;
   currentData.opened = new Array(currentData.rows * currentData.cols).fill(false);
@@ -1105,7 +1208,7 @@ async function clearProgress() {
 }
 
 function resetAll() {
-  if (!confirm('确定重置所有数据吗？奖品和口令都会清空！')) return;
+  if (!confirm('确定重置所有数据吗？奖品、口令和日志都会清空！')) return;
   currentData = getDefaultData();
   saveQueue = saveQueue.then(() => doSave('已重置'));
   document.getElementById('rowsInput').value = currentData.rows;
@@ -1113,6 +1216,7 @@ function resetAll() {
   renderGrid();
   renderGiftGrid();
   renderCodeList();
+  renderLogList();
   updateStatusBar();
 }
 
