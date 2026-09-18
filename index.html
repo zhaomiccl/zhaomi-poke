@@ -769,8 +769,10 @@ body::before {
   </div>
 </div>
 
-<button class="admin-btn" onclick="showPosterGallery()">🎨 中 奖 海 报</button>
-<button class="admin-btn" onclick="showAdminLogin()" style="margin-top: 8px;">⚙ 管 理 员</button>
+<div style="display:flex; gap:10px; position:relative; z-index:1; flex-shrink:0; margin-top:12px;">
+  <button class="admin-btn" onclick="showPosterGallery()" style="margin-top:0;">🎨 海报</button>
+  <button class="admin-btn" onclick="showAdminLogin()" style="margin-top:0;">⚙ 管理</button>
+</div>
 
 <!-- 管理员登录弹窗 -->
 <div class="modal" id="adminLoginModal">
