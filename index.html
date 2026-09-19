@@ -881,6 +881,60 @@ body::before {
   transform: translateY(-2px) scale(1.05);
 }
 
+/* ====== 未中奖模式（谢谢惠顾） ====== */
+.modal-content.lose-mode {
+  background: linear-gradient(160deg, rgba(30,30,50,0.92), rgba(40,40,60,0.92));
+  box-shadow: 
+    0 0 40px rgba(100, 100, 120, 0.2),
+    0 25px 70px rgba(0,0,0,0.5);
+  animation: resultSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 去掉金色流光边框 */
+.modal-content.lose-mode::before {
+  display: none;
+}
+
+.modal-content.lose-mode .result-icon {
+  filter: drop-shadow(0 0 15px rgba(150, 170, 200, 0.4));
+}
+
+.modal-content.lose-mode .result-congrats {
+  background: linear-gradient(135deg, #aaa, #ccc, #999);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: none;
+}
+
+.modal-content.lose-mode .prize-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.06), 
+    rgba(255, 255, 255, 0.02));
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-content.lose-mode .prize-card::before {
+  display: none;
+}
+
+.modal-content.lose-mode #resultText {
+  background: linear-gradient(135deg, #ccc 0%, #ddd 50%, #bbb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: prizeReveal 0.6s ease;
+  text-shadow: none;
+}
+
+.modal-content.lose-mode .prize-winner {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-content.lose-mode .result-sparkle {
+  display: none;
+}
+
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1779,10 +1833,32 @@ async function doPoke(index, code) {
   saveQueue = saveQueue.then(() => doSave());
   
   setTimeout(() => {
-    document.getElementById('resultText').textContent = gift;
-    document.getElementById('resultWinner').innerHTML = `中奖人：<span>${code || '匿名'}</span> · 第 ${index + 1} 格`;
-    showModal('resultModal');
-    startConfetti();
+    const isLose = gift.indexOf('谢谢惠顾') >= 0 || gift.indexOf('谢谢参与') >= 0 || gift.trim() === '';
+    const modal = document.getElementById('resultModal');
+    const modalContent = modal.querySelector('.modal-content');
+    
+    if (isLose) {
+      // 未中奖模式
+      modalContent.classList.add('lose-mode');
+      document.querySelector('.result-icon').textContent = '🌧️';
+      document.querySelector('.result-congrats').textContent = '再 接 再 厉';
+      document.querySelector('.prize-label').textContent = '— 开 出 的 内 容 —';
+      document.getElementById('resultText').textContent = gift.trim() || '谢谢惠顾';
+      document.getElementById('resultWinner').innerHTML = `第 ${index + 1} 格 · 期待下次好运`;
+      document.querySelector('.btn-poster').style.display = 'none';
+      showModal('resultModal');
+    } else {
+      // 中奖模式
+      modalContent.classList.remove('lose-mode');
+      document.querySelector('.result-icon').textContent = '🏆';
+      document.querySelector('.result-congrats').textContent = '恭 喜 中 奖';
+      document.querySelector('.prize-label').textContent = '— 您 的 奖 品 —';
+      document.getElementById('resultText').textContent = gift;
+      document.getElementById('resultWinner').innerHTML = `中奖人：<span>${code || '匿名'}</span> · 第 ${index + 1} 格`;
+      document.querySelector('.btn-poster').style.display = '';
+      showModal('resultModal');
+      startConfetti();
+    }
   }, 350);
 }
 
