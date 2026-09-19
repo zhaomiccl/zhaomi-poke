@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>着迷·戳戳乐 - 操作说明</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  background: linear-gradient(160deg, #1a0a2e 0%, #2d1b4e 40%, #4a1942 70%, #1a0a2e 100%);
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px 16px 40px 16px;
+  line-height: 1.8;
+}
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 36px 28px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+h1 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #fff, #ffe0ec, #ff8fab, #ff4d6d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+.link-box {
+  text-align: center;
+  margin: 20px 0;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,107,129,0.15), rgba(147,51,234,0.15));
+  border: 1px solid rgba(255,107,129,0.3);
+  border-radius: 14px;
+}
+.link-box a {
+  color: #ff8fab;
+  text-decoration: none;
+  font-size: 15px;
+  word-break: break-all;
+}
+h2 {
+  font-size: 20px;
+  margin: 32px 0 14px 0;
+  padding-left: 14px;
+  border-left: 4px solid #ff6b81;
+  color: #ffe0ec;
+  letter-spacing: 1px;
+}
+h3 {
+  font-size: 16px;
+  margin: 18px 0 8px 0;
+  color: #ffb3c1;
+}
+p { margin-bottom: 8px; font-size: 15px; color: rgba(255,255,255,0.88); }
+ol, ul { margin: 8px 0 14px 20px; font-size: 15px; color: rgba(255,255,255,0.88); }
+li { margin-bottom: 6px; }
+.step {
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.step-num {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  background: linear-gradient(135deg, #ff6b81, #c9184a);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 6px;
+}
+.tag-player { background: rgba(255,107,129,0.2); color: #ff8fab; border: 1px solid rgba(255,107,129,0.3); }
+.tag-admin { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
+.tag-tip { background: rgba(147,51,234,0.2); color: #c084fc; border: 1px solid rgba(147,51,234,0.3); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  color: #ffd700;
+  font-weight: 500;
+}
+td { color: rgba(255,255,255,0.8); }
+.note {
+  margin: 16px 0;
+  padding: 14px 16px;
+  background: rgba(255,215,0,0.08);
+  border-left: 4px solid #ffd700;
+  border-radius: 8px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+}
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>着 迷 · 戳 戳 乐</h1>
+<p class="subtitle">操 作 说 明</p>
+
+<div class="link-box">
+  <p style="margin-bottom:6px; font-size:13px; color:rgba(255,255,255,0.5);">游戏链接</p>
+  <a href="https://zhaomiccl.github.io/zhaomi-poke/" target="_blank">https://zhaomiccl.github.io/zhaomi-poke/</a>
+</div>
+
+<!-- ============ 玩家玩法 ============ -->
+<h2>一、玩家怎么玩</h2>
+
+<div class="step">
+  <span class="step-num">1</span>
+  <b>打开链接</b><br>
+  <p style="margin-top:6px;">点击上方游戏链接，进入戳戳乐主界面。会看到一个精美的格子墙，每个格子都是水晶玻璃质感的未揭开状态。</p>
+</div>
+
+<div class="step">
+  <span class="step-num">2</span>
+  <b>输入口令</b><br>
+  <p style="margin-top:6px;">点击任意一个格子，弹出「请输入口令」窗口。输入管理员发给你的口令（如"小明123"），点击「确认」。</p>
+  <ul style="margin-top:6px;">
+    <li>如果口令正确且有剩余次数 → 该格子被戳开，显示奖品内容</li>
+    <li>如果口令错误 → 提示"口令不正确"</li>
+    <li>如果次数用完 → 提示"这个口令的次数已经用完啦"</li>
+    <li>如果该格子已被戳开 → 提示"这个格子已经被戳开啦"</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-num">3</span>
+  <b>查看中奖结果</b><br>
+  <p style="margin-top:6px;">戳开格子后，会弹出中奖窗口：</p>
+  <ul>
+    <li><b>中奖了</b>：弹出华丽的中奖窗口，有彩带飘落动画、金色流光边框、奖杯弹跳动画，显示奖品名称和中奖人信息</li>
+    <li><b>谢谢惠顾</b>：如果格子内容是"谢谢惠顾"或"谢谢参与"，弹出简洁的"再接再厉"窗口，没有彩带特效</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-num">4</span>
+  <b>生成中奖海报</b><br>
+  <p style="margin-top:6px;">中奖后，可以在弹窗里点击「✨ 生成海报」按钮，生成一张华丽的中奖海报。也可以在主界面点击「🎨 海报」按钮，查看所有中奖记录的海报。</p>
+  <ul>
+    <li><b>长按图片</b> → 保存到手机相册</li>
+    <li><b>左右箭头</b> → 切换查看不同的中奖海报</li>
+    <li><b>保存当前</b> → 下载当前这张海报</li>
+    <li><b>全部保存</b> → 批量下载所有中奖海报</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-num">5</span>
+  <b>已戳开的格子</b><br>
+  <p style="margin-top:6px;">每个被戳开的格子会显示奖品内容，底部有小标签显示是谁戳开的（口令前两个汉字）。</p>
+</div>
+
+<!-- ============ 管理员操作 ============ -->
+<h2>二、管理员怎么操作</h2>
+
+<div class="note">
+  <b>管理员密码：</b>zhaomi2026<br>
+  <span style="font-size:13px; opacity:0.7;">在主界面点击「⚙ 管理」按钮，输入密码即可进入管理面板</span>
+</div>
+
+<h3>2.1 奖品设置（🎁 奖品标签）</h3>
+
+<div class="step">
+  <p><b>调整格子数量：</b></p>
+  <p>在奖品标签页顶部，可以设置行数和列数（1~10），点击「应用」按钮，格子会自动重新排列。修改行列数后，原来的奖品内容会尽量保留。</p>
+</div>
+
+<div class="step">
+  <p><b>设置每个格子的奖品：</b></p>
+  <p>在格子输入框中，逐个填写每个格子的奖品内容。例如：</p>
+  <ul>
+    <li>填写"一等奖·AirPods" → 戳到这个格子的人中奖</li>
+    <li>填写"谢谢惠顾" → 戳到这个格子的人未中奖，弹出"再接再厉"</li>
+    <li>留空 → 视同"谢谢惠顾"</li>
+  </ul>
+  <p><span class="tag-tip">提示</span>修改后自动保存，不需要手动点击保存。</p>
+</div>
+
+<h3>2.2 口令管理（🔑 口令标签）</h3>
+
+<div class="step">
+  <p><b>口令的作用：</b>控制谁能戳格子。只有持有正确口令的人才能戳。</p>
+</div>
+
+<div class="step">
+  <p><b>添加口令：</b></p>
+  <p>在「口令名称」输入框填入口令（如"小明123"），在「次数」输入框填写可戳次数（如3次），点击「添加」。</p>
+  <ul>
+    <li>每个口令对应一个人，这个人可以用这个口令戳指定次数</li>
+    <li>例如：口令"小明123"，次数3 → 小明可以戳3个格子</li>
+    <li>口令名称建议用"姓名+数字"格式，方便区分</li>
+  </ul>
+</div>
+
+<div class="step">
+  <p><b>删除口令：</b></p>
+  <p>口令列表中，每个口令右侧有「删除」按钮，点击即可删除该口令。删除后该口令立即失效。</p>
+</div>
+
+<div class="step">
+  <p><b>不设口令的情况：</b></p>
+  <p>如果没有添加任何口令，则所有人都可以直接戳格子，不需要输入口令。</p>
+</div>
+
+<h3>2.3 戳奖日志（📋 日志标签）</h3>
+
+<div class="step">
+  <p><b>查看日志：</b></p>
+  <p>日志标签页自动记录每次戳奖的信息，包括：</p>
+  <table>
+    <tr><th>字段</th><th>说明</th></tr>
+    <tr><td>口令</td><td>戳奖人使用的口令（匿名用户显示"匿名"）</td></tr>
+    <tr><td>奖品</td><td>戳到的奖品内容</td></tr>
+    <tr><td>格子</td><td>戳开的是第几个格子</td></tr>
+    <tr><td>时间</td><td>戳奖的时间（北京时间）</td></tr>
+  </table>
+  <p>日志按时间倒序排列，最新的在最上面。</p>
+</div>
+
+<div class="step">
+  <p><b>清空日志：</b></p>
+  <p>点击右上角「清空日志」按钮，可以清除所有日志记录。此操作不影响奖品和口令设置。</p>
+</div>
+
+<h3>2.4 其他操作</h3>
+
+<div class="step">
+  <p><b>清空记录（橙色按钮）：</b></p>
+  <p>将所有格子的"已戳开"状态重置为未戳开，但保留奖品内容和口令设置。相当于新一轮活动开始。</p>
+</div>
+
+<div class="step">
+  <p><b>重置所有（红色按钮）：</b></p>
+  <p>清空一切！包括奖品内容、口令、日志、戳开记录，全部恢复到初始空白状态。慎用！</p>
+</div>
+
+<!-- ============ 常见问题 ============ -->
+<h2>三、常见问题</h2>
+
+<div class="step">
+  <h3>Q：数据会丢失吗？</h3>
+  <p>不会。所有数据自动保存在云端（GitHub仓库），修改后自动同步。每次修改都有800ms延迟防抖，避免频繁写入。如果遇到网络波动，会自动重试。</p>
+</div>
+
+<div class="step">
+  <h3>Q：链接能永久使用吗？</h3>
+  <p>链接是 GitHub Pages 托管的，只要不删除仓库就能一直使用。如果 Token 过期导致无法保存数据，换一个新 Token 即可，历史数据不会丢失。</p>
+</div>
+
+<div class="step">
+  <h3>Q：页面没更新怎么办？</h3>
+  <p>GitHub Pages 有 CDN 缓存，可能延迟1-5分钟。可以在链接后面加 <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">?v=任意数字</code> 强制刷新，例如：<br>
+  https://zhaomiccl.github.io/zhaomi-poke/?v=99</p>
+</div>
+
+<div class="step">
+  <h3>Q：一个口令能戳几次？</h3>
+  <p>取决于管理员设置的次数。每次戳格子消耗1次，用完为止。可以在口令管理里查看剩余次数。</p>
+</div>
+
+<div class="step">
+  <h3>Q："谢谢惠顾"有特效吗？</h3>
+  <p>没有。如果格子内容包含"谢谢惠顾"或"谢谢参与"或为空，弹出的是简洁的灰色"再接再厉"窗口，无彩带、无流光。只有真正的奖品才有华丽特效。</p>
+</div>
+
+<div class="step">
+  <h3>Q：海报怎么保存？</h3>
+  <p>手机端：在海报弹窗里长按图片，选择"保存图片"即可存到相册。电脑端：点击「保存当前」按钮下载，或「全部保存」批量下载。</p>
+</div>
+
+<!-- ============ 快速上手流程 ============ -->
+<h2>四、快速上手流程</h2>
+
+<div class="step">
+  <p><span class="tag-admin">管理员</span><b>第一次使用：</b></p>
+  <ol>
+    <li>打开链接，点击「⚙ 管理」</li>
+    <li>输入密码 zhaomi2026，进入管理面板</li>
+    <li>在「🎁 奖品」标签：设置行列数（默认5×5），填写每个格子的奖品</li>
+    <li>切换到「🔑 口令」标签：添加口令（给每个参与者一个口令+次数）</li>
+    <li>关闭管理面板，把口令发给参与者</li>
+  </ol>
+</div>
+
+<div class="step">
+  <p><span class="tag-player">玩家</span><b>参与活动：</b></p>
+  <ol>
+    <li>打开链接，点击任意格子</li>
+    <li>输入管理员发的口令，确认</li>
+    <li>查看中奖结果，点击「✨ 生成海报」保存</li>
+    <li>继续戳其他格子（口令次数没用完的话）</li>
+  </ol>
+</div>
+
+<div class="step">
+  <p><span class="tag-admin">管理员</span><b>活动后查看：</b></p>
+  <ol>
+    <li>进入管理面板，切换到「📋 日志」标签</li>
+    <li>查看谁戳了什么奖品</li>
+    <li>如需新一轮活动：点击「清空记录」重置戳开状态</li>
+  </ol>
+</div>
+
+<div class="footer">
+  着迷 · 戳戳乐 · zhaomiccl.github.io/zhaomi-poke
+</div>
+
+</div>
+</body>
+</html>
