@@ -667,26 +667,218 @@ body::before {
   transform: translateX(-50%) translateY(0);
 }
 
-/* 结果弹窗 */
+/* ====== 中奖弹窗华丽样式 ====== */
+#resultModal {
+  background: radial-gradient(ellipse at center, rgba(26,10,46,0.85) 0%, rgba(0,0,0,0.92) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
 #resultModal .modal-content {
   text-align: center;
-  padding: 40px 30px;
+  padding: 0;
+  background: linear-gradient(160deg, rgba(26,10,46,0.92), rgba(74,25,66,0.92));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 0 60px rgba(255, 107, 129, 0.3),
+    0 0 120px rgba(147, 51, 234, 0.2),
+    0 25px 70px rgba(0,0,0,0.5);
+  animation: resultSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-#resultTitle {
-  font-size: 32px;
-  margin-bottom: 8px;
+@keyframes resultSlideUp {
+  from { opacity: 0; transform: translateY(50px) scale(0.85); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-#resultText {
-  font-size: 24px;
-  margin: 20px 0;
-  color: #dc2430;
-  font-weight: 500;
-  background: linear-gradient(135deg, #dc2430, #ff6b81);
+/* 金色边框光效 */
+#resultModal .modal-content::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.6) 0%,
+    rgba(255, 107, 129, 0.4) 25%,
+    rgba(147, 51, 234, 0.5) 50%,
+    rgba(255, 107, 129, 0.4) 75%,
+    rgba(255, 215, 0, 0.6) 100%);
+  background-size: 300% 300%;
+  z-index: -1;
+  animation: borderFlow 4s linear infinite;
+}
+
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* 彩带画布 */
+#confettiCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 101;
+}
+
+/* 中奖图标 */
+.result-icon {
+  font-size: 64px;
+  margin: 20px 0 8px 0;
+  animation: prizeBounce 0.8s ease;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+}
+
+@keyframes prizeBounce {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+  80% { transform: scale(0.9) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* "恭喜中奖" 渐变标题 */
+.result-congrats {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0 4px 0;
+  background: linear-gradient(135deg, #ffd700, #ff6b81, #ffd700);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: goldShine 3s linear infinite;
+  letter-spacing: 3px;
+}
+
+@keyframes goldShine {
+  to { background-position: 200% center; }
+}
+
+/* 奖品卡片 */
+.prize-card {
+  margin: 16px auto;
+  width: 85%;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12), 
+    rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+/* 卡片闪光扫过 */
+.prize-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.15), 
+    transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  50%, 100% { left: 200%; }
+}
+
+/* 奖品标签 */
+.prize-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+/* 奖品名称 */
+#resultText {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 8px 0;
+  background: linear-gradient(135deg, #fff 0%, #ffe0ec 30%, #ff8fab 50%, #ff4d6d 70%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: prizeReveal 0.8s ease, goldShine 3s linear infinite 0.8s;
+  text-shadow: 0 0 30px rgba(255, 107, 129, 0.3);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+@keyframes prizeReveal {
+  0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.15) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* 装饰星星 */
+.result-sparkle {
+  position: absolute;
+  font-size: 14px;
+  color: rgba(255, 215, 0, 0.6);
+  pointer-events: none;
+  animation: sparkleFloat 2s ease-in-out infinite;
+}
+
+@keyframes sparkleFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
+}
+
+/* 中奖人信息 */
+.prize-winner {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 12px 0 16px 0;
+}
+
+.prize-winner span {
+  color: #ffd700;
+  font-weight: 500;
+}
+
+/* 按钮区域 */
+.result-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0 20px 24px 20px;
+}
+
+.result-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.result-actions .btn-poster {
+  background: linear-gradient(135deg, #9333ea, #c026d3);
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+}
+
+.result-actions .btn-close {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.result-actions button:hover {
+  transform: translateY(-2px) scale(1.05);
 }
 
 /* 滚动条美化 */
@@ -841,14 +1033,26 @@ body::before {
   </div>
 </div>
 
+<!-- 彩带画布 -->
+<canvas id="confettiCanvas"></canvas>
+
 <!-- 戳奖结果弹窗 -->
 <div class="modal" id="resultModal">
   <div class="modal-content">
-    <h2 id="resultTitle">🎉</h2>
-    <p id="resultText"></p>
-    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-      <button onclick="showCurrentPoster()" style="background: linear-gradient(135deg, #9333ea, #c026d3); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.35);">✨ 生成海报</button>
-      <button onclick="closeModal('resultModal')">好 的</button>
+    <div class="result-icon">🏆</div>
+    <div class="result-congrats">恭 喜 中 奖</div>
+    <div class="result-sparkle" style="top:30px; left:15%; animation-delay:0s;">✦</div>
+    <div class="result-sparkle" style="top:50px; right:18%; animation-delay:0.5s;">✦</div>
+    <div class="result-sparkle" style="top:80px; left:25%; animation-delay:1s;">✧</div>
+    <div class="result-sparkle" style="top:100px; right:25%; animation-delay:1.5s;">✧</div>
+    <div class="prize-card">
+      <div class="prize-label">— 您 的 奖 品 —</div>
+      <p id="resultText"></p>
+      <div class="prize-winner" id="resultWinner"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-poster" onclick="showCurrentPoster()">✨ 生成海报</button>
+      <button class="btn-close" onclick="closeModal('resultModal')">好 的</button>
     </div>
   </div>
 </div>
@@ -1575,9 +1779,10 @@ async function doPoke(index, code) {
   saveQueue = saveQueue.then(() => doSave());
   
   setTimeout(() => {
-    document.getElementById('resultTitle').textContent = '🎉 恭喜！';
     document.getElementById('resultText').textContent = gift;
+    document.getElementById('resultWinner').innerHTML = `中奖人：<span>${code || '匿名'}</span> · 第 ${index + 1} 格`;
     showModal('resultModal');
+    startConfetti();
   }, 350);
 }
 
@@ -1769,7 +1974,133 @@ function resetAll() {
 
 // ====== 弹窗 ======
 function showModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+  if (id === 'resultModal') stopConfetti();
+}
+
+// ====== 彩带粒子动画 ======
+let confettiAnimId = null;
+let confettiParticles = [];
+
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = [
+    '#ff6b81', '#ffd700', '#ff4d6d', '#9333ea',
+    '#c026d3', '#ff8fab', '#fff', '#ffb3c1'
+  ];
+  const shapes = ['circle', 'rect', 'triangle'];
+
+  confettiParticles = [];
+  // 初始爆发
+  for (let i = 0; i < 120; i++) {
+    confettiParticles.push(createConfettiParticle(canvas, colors, shapes, true));
+  }
+
+  // 持续发射
+  const burstInterval = setInterval(() => {
+    if (!document.getElementById('resultModal').classList.contains('show')) {
+      clearInterval(burstInterval);
+      return;
+    }
+    for (let i = 0; i < 8; i++) {
+      confettiParticles.push(createConfettiParticle(canvas, colors, shapes, false));
+    }
+  }, 400);
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    confettiParticles = confettiParticles.filter(p => p.y < canvas.height + 50 && p.life > 0);
+
+    confettiParticles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.08; // 重力
+      p.vx *= 0.99;
+      p.rotation += p.rotSpeed;
+      p.life -= 0.005;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.shape === 'rect') {
+        ctx.fillRect(-p.size, -p.size * 0.4, p.size * 2, p.size * 0.8);
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(0, -p.size);
+        ctx.lineTo(p.size, p.size);
+        ctx.lineTo(-p.size, p.size);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    confettiAnimId = requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+function createConfettiParticle(canvas, colors, shapes, isBurst) {
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+  if (isBurst) {
+    // 爆发：从中心发射
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 8 + 4;
+    return {
+      x: canvas.width / 2,
+      y: canvas.height / 2 - 50,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 5,
+      size: Math.random() * 6 + 3,
+      color, shape,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.3,
+      life: 1
+    };
+  } else {
+    // 持续：从顶部掉落
+    return {
+      x: Math.random() * canvas.width,
+      y: -20,
+      vx: (Math.random() - 0.5) * 3,
+      vy: Math.random() * 3 + 2,
+      size: Math.random() * 5 + 2,
+      color, shape,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.2,
+      life: 1
+    };
+  }
+}
+
+function stopConfetti() {
+  if (confettiAnimId) {
+    cancelAnimationFrame(confettiAnimId);
+    confettiAnimId = null;
+  }
+  confettiParticles = [];
+  const canvas = document.getElementById('confettiCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
 
 function updateStatusBar() {
   if (!currentData) return;
