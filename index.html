@@ -1181,8 +1181,8 @@ body::before {
   <div class="modal-content" style="text-align:center; padding: 20px; max-width: 500px;">
     <h2 style="margin-bottom: 10px;">🎊 我的中奖海报</h2>
     <p style="font-size:13px; color:#888; margin-bottom:10px;" id="posterCount">共 0 张</p>
-    <div id="posterContainer" style="margin: 10px 0; position: relative;">
-      <img id="posterImage" style="max-width:100%; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display:block; -webkit-touch-callout: default;" alt="中奖海报">
+    <div id="posterContainer" style="margin: 10px 0; position: relative; max-height: 65vh; overflow-y: auto; border-radius: 16px;">
+      <img id="posterImage" style="width:100%; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display:block; -webkit-touch-callout: default;" alt="中奖海报">
       <canvas id="posterCanvas" style="display:none;"></canvas>
       <button class="poster-nav prev" onclick="prevPoster()" style="display:none;">‹</button>
       <button class="poster-nav next" onclick="nextPoster()" style="display:none;">›</button>
@@ -1600,23 +1600,27 @@ function generateSummaryPoster(winners) {
   const ctx = canvas.getContext('2d');
   
   const W = 750;
-  const H = 1200;
-  canvas.width = W;
-  canvas.height = H;
   const n = winners.length;
   
-  // 根据人数动态计算卡片高度，确保框住所有文字
-  // 标题区 ~70px，分隔线 ~10px，每行行高根据人数自适应，底部总人数 ~40px
-  const titleAreaH = 100; // 标题+分隔线
-  const footerAreaH = 50; // 底部总人数
-  let rowH = 50; // 默认行高
-  if (n > 8) rowH = Math.max(28, Math.min(50, (H * 0.45 - titleAreaH - footerAreaH) / n));
-  let fontSize = rowH > 38 ? 26 : (rowH > 28 ? 22 : 18);
+  // 固定行高50px，字体26px，不再压缩
+  const rowH = 50;
+  const fontSize = 26;
   
+  // 布局参数
+  const headerH = 400; // 顶部标题+副标题+装饰线区域
+  const titleAreaH = 100; // 卡片内标题+分隔线
+  const footerAreaH = 50; // 卡片内底部总人数
+  const cardPadding = 20;
   const listContentH = n * rowH;
-  const cardH = titleAreaH + listContentH + footerAreaH + 20;
-  const cardY = H * 0.33;
+  const cardH = titleAreaH + listContentH + footerAreaH + cardPadding;
+  const cardY = headerH - 30;
   const cardEndY = cardY + cardH;
+  const bottomDecorH = 110; // 底部装饰文本区域
+  
+  // 画布总高度自适应：头部 + 卡片 + 底部装饰 + 边距
+  const H = Math.max(1200, cardEndY + bottomDecorH);
+  canvas.width = W;
+  canvas.height = H;
   
   // 1. 渐变背景
   const bgGrad = ctx.createLinearGradient(0, 0, W, H);
@@ -1628,13 +1632,14 @@ function generateSummaryPoster(winners) {
   ctx.fillRect(0, 0, W, H);
   
   // 2. 光晕装饰
-  const glow1 = ctx.createRadialGradient(W*0.2, H*0.15, 0, W*0.2, H*0.15, W*0.5);
+  const glow1 = ctx.createRadialGradient(W*0.2, 180, 0, W*0.2, 180, W*0.5);
   glow1.addColorStop(0, 'rgba(255, 107, 129, 0.3)');
   glow1.addColorStop(1, 'transparent');
   ctx.fillStyle = glow1;
   ctx.fillRect(0, 0, W, H);
   
-  const glow2 = ctx.createRadialGradient(W*0.8, H*0.85, 0, W*0.8, H*0.85, W*0.5);
+  const glow2y = Math.min(H - 180, cardEndY + 50);
+  const glow2 = ctx.createRadialGradient(W*0.8, glow2y, 0, W*0.8, glow2y, W*0.5);
   glow2.addColorStop(0, 'rgba(147, 51, 234, 0.35)');
   glow2.addColorStop(1, 'transparent');
   ctx.fillStyle = glow2;
@@ -1647,8 +1652,8 @@ function generateSummaryPoster(winners) {
   ctx.strokeStyle = 'rgba(255, 200, 150, 0.5)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(W*0.15, H*0.12);
-  ctx.lineTo(W*0.85, H*0.12);
+  ctx.moveTo(W*0.15, 80);
+  ctx.lineTo(W*0.85, 80);
   ctx.stroke();
   
   // 5. 主标题 "着迷"
@@ -1658,14 +1663,14 @@ function generateSummaryPoster(winners) {
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(255, 107, 129, 0.8)';
   ctx.shadowBlur = 30;
-  const titleGrad = ctx.createLinearGradient(W/2, H*0.16, W/2, H*0.26);
+  const titleGrad = ctx.createLinearGradient(W/2, 180, W/2, 300);
   titleGrad.addColorStop(0, '#fff');
   titleGrad.addColorStop(0.3, '#ffe0ec');
   titleGrad.addColorStop(0.5, '#ff8fab');
   titleGrad.addColorStop(0.7, '#ff4d6d');
   titleGrad.addColorStop(1, '#ff6b81');
   ctx.fillStyle = titleGrad;
-  ctx.fillText('着 迷', W/2, H*0.21);
+  ctx.fillText('着 迷', W/2, 250);
   ctx.restore();
   
   // 6. 副标题
@@ -1675,7 +1680,7 @@ function generateSummaryPoster(winners) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
   ctx.shadowColor = 'rgba(255, 182, 193, 0.6)';
   ctx.shadowBlur = 10;
-  ctx.fillText('✦ 戳 戳 乐 ✦', W/2, H*0.28);
+  ctx.fillText('✦ 戳 戳 乐 ✦', W/2, 340);
   ctx.restore();
   
   // 7. 汇总卡片（高度自适应内容）
@@ -1734,17 +1739,14 @@ function generateSummaryPoster(winners) {
     
     // 奖品名（左对齐，占卡片左半部分）
     let prizeDisplay = w.gift || '神秘奖品';
-    // 根据字体大小限制字数
-    const maxLen = fontSize >= 24 ? 10 : (fontSize >= 20 ? 12 : 14);
-    if (prizeDisplay.length > maxLen) prizeDisplay = prizeDisplay.substring(0, maxLen) + '…';
+    if (prizeDisplay.length > 10) prizeDisplay = prizeDisplay.substring(0, 10) + '…';
     ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.fillText(prizeDisplay, cardX + 50, y);
     
     // 中奖人 + 格号（右对齐）
     let winnerDisplay = `${w.code} · 第${w.cell}格`;
-    const maxWLen = fontSize >= 24 ? 14 : (fontSize >= 20 ? 16 : 18);
-    if (winnerDisplay.length > maxWLen) winnerDisplay = winnerDisplay.substring(0, maxWLen - 1) + '…';
+    if (winnerDisplay.length > 14) winnerDisplay = winnerDisplay.substring(0, 13) + '…';
     ctx.font = `${fontSize - 2}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 200, 200, 0.75)';
     ctx.textAlign = 'right';
