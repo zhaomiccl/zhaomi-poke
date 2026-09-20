@@ -1555,8 +1555,13 @@ function showPosterGallery() {
     return;
   }
   
+  // 按中奖人名字拼音排序
+  winners.sort((a, b) => (a.code || '').localeCompare(b.code || '', 'zh-Hans-CN'));
+  // 汇总海报使用排序后的列表，单独海报保持原始顺序
+  const sortedWinners = winners.slice();
+  
   // 第一张是全员汇总海报，后面是各中奖者的单独海报
-  posterList = [{ isSummary: true, winners: winners }].concat(winners);
+  posterList = [{ isSummary: true, winners: sortedWinners }].concat(winners);
   
   currentPosterIndex = 0;
   document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 1 张`;
@@ -1604,7 +1609,7 @@ function generateSummaryPoster(winners) {
   
   // 固定行高50px，字体26px，不再压缩
   const rowH = 36;
-  const fontSize = 24;
+  const fontSize = 28;
   
   // 布局参数
   const headerH = 400; // 顶部标题+副标题+装饰线区域
@@ -1737,20 +1742,20 @@ function generateSummaryPoster(winners) {
     ctx.fillStyle = '#ffd700';
     ctx.fillText(`${i + 1}.`, cardX + 20, y);
     
-    // 奖品名（左对齐，占卡片左半部分）
+    // 中奖人名字（左对齐）
+    let nameDisplay = w.code || '匿名';
+    if (nameDisplay.length > 8) nameDisplay = nameDisplay.substring(0, 8) + '…';
+    ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText(nameDisplay, cardX + 55, y);
+    
+    // 奖品名（右对齐）
     let prizeDisplay = w.gift || '神秘奖品';
     if (prizeDisplay.length > 10) prizeDisplay = prizeDisplay.substring(0, 10) + '…';
     ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText(prizeDisplay, cardX + 50, y);
-    
-    // 中奖人 + 格号（右对齐）
-    let winnerDisplay = `${w.code} · 第${w.cell}格`;
-    if (winnerDisplay.length > 14) winnerDisplay = winnerDisplay.substring(0, 13) + '…';
-    ctx.font = `${fontSize - 2}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-    ctx.fillStyle = 'rgba(255, 200, 200, 0.75)';
+    ctx.fillStyle = 'rgba(255, 200, 200, 0.8)';
     ctx.textAlign = 'right';
-    ctx.fillText(winnerDisplay, cardX + cardW - 20, y);
+    ctx.fillText(prizeDisplay, cardX + cardW - 20, y);
   });
   ctx.restore();
   
@@ -2201,8 +2206,11 @@ function showCurrentPoster() {
     return;
   }
   
+  // 按中奖人名字拼音排序（汇总海报用排序后列表）
+  const sortedWinners = winners.slice().sort((a, b) => (a.code || '').localeCompare(b.code || '', 'zh-Hans-CN'));
+  
   // 第一张是全员汇总海报，后面是各中奖者的单独海报（+1偏移）
-  posterList = [{ isSummary: true, winners: winners }].concat(winners);
+  posterList = [{ isSummary: true, winners: sortedWinners }].concat(winners);
   currentPosterIndex = targetIndex + 1;
   document.getElementById('posterCount').textContent = `共 ${posterList.length} 张 · 第 ${currentPosterIndex + 1} 张`;
   
