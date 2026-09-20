@@ -1740,14 +1740,14 @@ function generateSummaryPoster(winners) {
     ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffd700';
-    ctx.fillText(`${i + 1}.`, cardX + 20, y);
+    ctx.fillText(`${i + 1}.`, cardX + 130, y);
     
     // 中奖人名字（左对齐）
     let nameDisplay = w.code || '匿名';
     if (nameDisplay.length > 8) nameDisplay = nameDisplay.substring(0, 8) + '…';
     ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText(nameDisplay, cardX + 55, y);
+    ctx.fillText(nameDisplay, cardX + 170, y);
     
     // 奖品名（右对齐）
     let prizeDisplay = w.gift || '神秘奖品';
@@ -1755,7 +1755,7 @@ function generateSummaryPoster(winners) {
     ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 200, 200, 0.8)';
     ctx.textAlign = 'right';
-    ctx.fillText(prizeDisplay, cardX + cardW - 20, y);
+    ctx.fillText(prizeDisplay, cardX + cardW - 130, y);
   });
   ctx.restore();
   
