@@ -63,6 +63,42 @@ body::before {
   padding: 8px 0 6px 0;
 }
 
+/* 赞助文案 */
+.sponsor-bar {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin: 4px 0 6px 0;
+  padding: 5px 16px;
+  background: linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,107,129,0.12), rgba(147,51,234,0.15));
+  border: 1px solid rgba(255,215,0,0.35);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15);
+  max-width: 90vw;
+  text-align: center;
+}
+.sponsor-bar .sponsor-text {
+  font-size: 13px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #ffd700, #fff5b8, #ff8fab, #ffd700);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: sponsorShine 4s ease-in-out infinite;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+.sponsor-bar:empty,
+.sponsor-bar.hidden { display: none; }
+
+@keyframes sponsorShine {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 200% 0%; }
+}
+
 /* 着迷 - 主标题艺术字 */
 .title-main {
   font-size: 56px;
@@ -979,6 +1015,7 @@ body::before {
 @media (max-height: 650px) {
   .title-main { font-size: 42px; }
   .title-sub { font-size: 17px; }
+  .sponsor-bar .sponsor-text { font-size: 11px; }
   .admin-btn { margin-top: 8px; padding: 7px 18px; font-size: 12px; }
   .header { padding: 4px 0; }
   .status-bar { margin-top: 2px; font-size: 10px; }
@@ -987,6 +1024,8 @@ body::before {
 @media (max-height: 500px) {
   .title-main { font-size: 34px; }
   .title-sub { font-size: 14px; }
+  .sponsor-bar .sponsor-text { font-size: 10px; }
+  .sponsor-bar { padding: 3px 12px; margin: 2px 0 4px 0; }
   .header { padding: 2px 0; }
 }
 
@@ -1005,6 +1044,10 @@ body::before {
   <div class="title-sub">
     <span class="char">戳</span><span class="dot">✦</span><span class="char">戳</span><span class="dot">✦</span><span class="char">乐</span>
   </div>
+</div>
+
+<div class="sponsor-bar hidden" id="sponsorBar">
+  <span class="sponsor-text" id="sponsorText"></span>
 </div>
 
 <p class="status-bar" id="statusBar">准备中...</p>
@@ -1044,6 +1087,11 @@ body::before {
     
     <!-- 奖品设置 -->
     <div class="admin-tab-content active" id="tabGifts">
+      <div style="margin-bottom:12px; padding:10px 12px; background:linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,107,129,0.06)); border:1px solid rgba(255,215,0,0.25); border-radius:10px;">
+        <label style="font-size:13px; color:#ffd700; font-weight:600; display:block; margin-bottom:6px;">✨ 赞助文案（显示在标题下方）</label>
+        <input type="text" id="sponsorInput" placeholder="如：感谢赞助老板@张总" style="width:100%; font-size:14px; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,215,0,0.3); background:rgba(255,255,255,0.08); color:#333;" oninput="setSponsorText(this.value)">
+        <p style="font-size:11px; color:#aaa; margin-top:4px;">留空则不显示。修改后自动保存。</p>
+      </div>
       <div class="size-control">
         <span>行数:</span>
         <input type="number" id="rowsInput" min="1" max="10" value="5">
@@ -1178,12 +1226,14 @@ function calcCellSize(rows, cols) {
   const header = document.querySelector('.header');
   const statusBar = document.querySelector('.status-bar');
   const adminBtn = document.querySelector('.admin-btn');
+  const sponsorBar = document.getElementById('sponsorBar');
   
   const headerH = header ? header.offsetHeight : 120;
   const statusH = statusBar ? statusBar.offsetHeight : 20;
   const btnH = adminBtn ? adminBtn.offsetHeight + 20 : 60;
+  const sponsorH = (sponsorBar && !sponsorBar.classList.contains('hidden')) ? sponsorBar.offsetHeight + 4 : 0;
   
-  const usedH = headerH + statusH + btnH + 20;
+  const usedH = headerH + sponsorH + statusH + btnH + 20;
   const availableH = vh - usedH;
   const availableW = vw - 24;
   
@@ -1319,6 +1369,7 @@ function normalizeData(data) {
   if (!data.pokedBy || data.pokedBy.length !== total) data.pokedBy = new Array(total).fill('');
   if (!data.codes) data.codes = {};
   if (!data.logs) data.logs = [];
+  if (data.sponsorText === undefined) data.sponsorText = '';
   return data;
 }
 
@@ -1330,11 +1381,25 @@ function getDefaultData() {
     opened: new Array(total).fill(false),
     pokedBy: new Array(total).fill(''),
     codes: {},
-    logs: []
+    logs: [],
+    sponsorText: ''
   };
 }
 
 // ====== 渲染 ======
+function renderSponsorBar() {
+  if (!currentData) return;
+  const bar = document.getElementById('sponsorBar');
+  const text = document.getElementById('sponsorText');
+  const content = currentData.sponsorText || '';
+  if (content.trim()) {
+    text.textContent = content;
+    bar.classList.remove('hidden');
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
 function getDisplayCode(code) {
   if (!code) return '';
   // 提取前两个汉字（如果有的话）
@@ -1348,6 +1413,7 @@ function getDisplayCode(code) {
 
 function renderGrid() {
   if (!currentData) return;
+  renderSponsorBar();
   const grid = document.getElementById('grid');
   grid.style.gridTemplateColumns = `repeat(${currentData.cols}, 1fr)`;
   grid.innerHTML = '';
@@ -1934,6 +2000,7 @@ async function adminLogin() {
   }
   document.getElementById('rowsInput').value = currentData.rows;
   document.getElementById('colsInput').value = currentData.cols;
+  document.getElementById('sponsorInput').value = currentData.sponsorText || '';
   renderGiftGrid();
   renderCodeList();
   renderLogList();
@@ -1946,6 +2013,15 @@ let saveQueue = Promise.resolve();
 function setGift(index, content) {
   currentData.gifts[index] = content;
   // 防抖自动保存：停止输入 800ms 后保存
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveQueue = saveQueue.then(() => doSave('已自动保存'));
+  }, 800);
+}
+
+function setSponsorText(text) {
+  currentData.sponsorText = text;
+  renderSponsorBar();
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     saveQueue = saveQueue.then(() => doSave('已自动保存'));
