@@ -1536,12 +1536,14 @@ let currentPosterIndex = 0;
 function showPosterGallery() {
   if (!currentData) { showToast('数据加载中...'); return; }
   
-  // 收集所有中奖记录
+  // 收集所有中奖记录（跳过空格/谢谢惠顾等未中奖）
   posterList = [];
   for (let i = 0; i < currentData.opened.length; i++) {
     if (currentData.opened[i]) {
+      const g = (currentData.gifts[i] || '').trim();
+      if (!g || g.indexOf('谢谢惠顾') >= 0 || g.indexOf('谢谢参与') >= 0) continue;
       posterList.push({
-        gift: currentData.gifts[i] || '空',
+        gift: currentData.gifts[i],
         code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
         cell: i + 1
       });
@@ -1970,8 +1972,10 @@ function showCurrentPoster() {
   let targetIndex = 0;
   for (let i = 0; i < currentData.opened.length; i++) {
     if (currentData.opened[i]) {
+      const g = (currentData.gifts[i] || '').trim();
+      if (!g || g.indexOf('谢谢惠顾') >= 0 || g.indexOf('谢谢参与') >= 0) continue;
       posterList.push({
-        gift: currentData.gifts[i] || '空',
+        gift: currentData.gifts[i],
         code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
         cell: i + 1
       });
