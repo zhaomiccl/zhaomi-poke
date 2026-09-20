@@ -9,6 +9,7 @@
 
 :root {
   --cell-size: 50px;
+  --cell-h: 50px;
   --cell-gap: 8px;
 }
 
@@ -301,7 +302,7 @@ body::before {
 /* 单个格子 - 水晶玻璃效果 */
 .cell {
   width: var(--cell-size);
-  height: var(--cell-size);
+  height: var(--cell-h);
   background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
   border: 1px solid rgba(255,255,255,0.3);
   border-radius: calc(var(--cell-size) * 0.22);
@@ -1240,19 +1241,32 @@ function calcCellSize(rows, cols) {
   const paddingRatio = 0.3;
   const gap = Math.max(4, Math.min(12, availableW / 40));
   
+  // 宽度约束（列数多时限制宽度）
   const maxByW = (availableW - (cols - 1) * gap) / (cols + 2 * paddingRatio);
+  // 高度约束（行数少时纵向空间充足）
   const maxByH = (availableH - (rows - 1) * gap) / (rows + 2 * paddingRatio);
   
-  let size = Math.min(maxByW, maxByH);
-  size = Math.max(24, Math.min(120, size));
+  // 宽度：受水平空间约束
+  let cellW = Math.min(maxByW, 120);
+  cellW = Math.max(24, cellW);
   
-  return { size: Math.floor(size), gap: Math.floor(gap) };
+  // 高度：受垂直空间约束，独立计算
+  let cellH = Math.min(maxByH, 120);
+  cellH = Math.max(24, cellH);
+  
+  // 限制长宽比，避免格子过度变形（最大1.8倍）
+  const maxRatio = 1.8;
+  if (cellH > cellW * maxRatio) cellH = cellW * maxRatio;
+  if (cellW > cellH * maxRatio) cellW = cellH * maxRatio;
+  
+  return { w: Math.floor(cellW), h: Math.floor(cellH), gap: Math.floor(gap) };
 }
 
 function updateGridSize() {
   if (!currentData) return;
-  const { size, gap } = calcCellSize(currentData.rows, currentData.cols);
-  document.documentElement.style.setProperty('--cell-size', size + 'px');
+  const { w, h, gap } = calcCellSize(currentData.rows, currentData.cols);
+  document.documentElement.style.setProperty('--cell-size', w + 'px');
+  document.documentElement.style.setProperty('--cell-h', h + 'px');
   document.documentElement.style.setProperty('--cell-gap', gap + 'px');
 }
 
