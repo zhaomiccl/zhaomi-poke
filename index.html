@@ -1886,7 +1886,7 @@ async function doPoke(index, code) {
   
   data.opened[index] = true;
   data.pokedBy[index] = code || '匿名';
-  const gift = data.gifts[index] || '什么都没有～';
+  const gift = data.gifts[index] || '';
   
   // 记录日志
   if (!data.logs) data.logs = [];
