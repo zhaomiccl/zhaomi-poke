@@ -1472,6 +1472,17 @@ function getDisplayCode(code) {
   return code.slice(0, 2);
 }
 
+// 判断是否为未中奖奖品（空格、谢谢惠顾、空空如也等）
+function isLoseGift(gift) {
+  const g = (gift || '').trim();
+  if (!g) return true;
+  if (g.indexOf('谢谢惠顾') >= 0) return true;
+  if (g.indexOf('谢谢参与') >= 0) return true;
+  if (g.indexOf('空空如也') >= 0) return true;
+  if (g.indexOf('什么都没有') >= 0) return true;
+  return false;
+}
+
 function renderGrid() {
   if (!currentData) return;
   renderSponsorBar();
@@ -1487,7 +1498,7 @@ function renderGrid() {
     if (currentData.opened[i]) {
       const poker = currentData.pokedBy && currentData.pokedBy[i] ? getDisplayCode(currentData.pokedBy[i]) : '';
       const giftText = currentData.gifts[i] || '';
-      const isLose = giftText.indexOf('谢谢惠顾') >= 0 || giftText.indexOf('谢谢参与') >= 0 || giftText.trim() === '';
+      const isLose = isLoseGift(giftText);
       if (isLose) cell.classList.add('lose');
       cell.innerHTML = `
         <div class="gift">${giftText.trim() || '谢谢惠顾'}</div>
@@ -1576,7 +1587,7 @@ function showPosterGallery() {
   for (let i = 0; i < currentData.opened.length; i++) {
     if (currentData.opened[i]) {
       const g = (currentData.gifts[i] || '').trim();
-      if (!g || g.indexOf('谢谢惠顾') >= 0 || g.indexOf('谢谢参与') >= 0) continue;
+      if (isLoseGift(g)) continue;
       winners.push({
         gift: currentData.gifts[i],
         code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
@@ -2184,7 +2195,7 @@ async function doPoke(index, code) {
   saveQueue = saveQueue.then(() => doSave());
   
   setTimeout(() => {
-    const isLose = gift.indexOf('谢谢惠顾') >= 0 || gift.indexOf('谢谢参与') >= 0 || gift.trim() === '';
+    const isLose = isLoseGift(gift);
     const modal = document.getElementById('resultModal');
     const modalContent = modal.querySelector('.modal-content');
     
@@ -2223,7 +2234,7 @@ function showCurrentPoster() {
   for (let i = 0; i < currentData.opened.length; i++) {
     if (currentData.opened[i]) {
       const g = (currentData.gifts[i] || '').trim();
-      if (!g || g.indexOf('谢谢惠顾') >= 0 || g.indexOf('谢谢参与') >= 0) continue;
+      if (isLoseGift(g)) continue;
       winners.push({
         gift: currentData.gifts[i],
         code: currentData.pokedBy && currentData.pokedBy[i] ? currentData.pokedBy[i] : '匿名',
