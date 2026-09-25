@@ -576,11 +576,36 @@ body::before {
   color: #1a1a2e;
 }
 
+.code-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-item-actions input[type="number"] {
+  width: 60px;
+  padding: 5px 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+}
+
+.code-item-actions input[type="number"]:focus {
+  border-color: #ff6b81;
+}
+
 .code-item button {
   background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
   padding: 6px 14px;
   font-size: 12px;
   box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+}
+
+.code-item button.btn-add {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  box-shadow: 0 2px 8px rgba(78,205,196,0.3);
 }
 
 .code-list {
@@ -1497,7 +1522,11 @@ function renderCodeList() {
   list.innerHTML = names.map(name => `
     <div class="code-item">
       <span>${name} (${codes[name].used}/${codes[name].total}次)</span>
-      <button onclick="delCode('${name}')">删除</button>
+      <div class="code-item-actions">
+        <input type="number" min="1" placeholder="加次数" id="addCount_${encodeURIComponent(name)}" />
+        <button onclick="addCountToCode('${name}')" class="btn-add">+次数</button>
+        <button onclick="delCode('${name}')">删除</button>
+      </div>
     </div>
   `).join('');
 }
@@ -2346,6 +2375,17 @@ async function delCode(name) {
   if (!confirm(`确定删除口令"${name}"吗？`)) return;
   delete currentData.codes[name];
   saveQueue = saveQueue.then(() => doSave('已删除'));
+  renderCodeList();
+}
+
+async function addCountToCode(name) {
+  const input = document.getElementById(`addCount_${encodeURIComponent(name)}`);
+  const add = parseInt(input.value);
+  if (!add || add < 1) { showToast('请输入有效的次数'); return; }
+  if (!currentData.codes[name]) { showToast('口令不存在'); return; }
+  currentData.codes[name].total += add;
+  input.value = '';
+  saveQueue = saveQueue.then(() => doSave(`已为"${name}"增加${add}次`));
   renderCodeList();
 }
 
