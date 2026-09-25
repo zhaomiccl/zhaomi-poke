@@ -400,6 +400,23 @@ body::before {
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
+/* 格子序号 —— 左上角小角标，不影响布局 */
+.cell .cell-index {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  font-size: calc(var(--cell-size) * 0.13);
+  color: rgba(255,255,255,0.55);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 3;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.cell.opened .cell-index {
+  color: rgba(0,0,0,0.35);
+}
+
 /* 戳开动画 */
 .cell.poking {
   animation: poke 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -558,6 +575,23 @@ body::before {
   padding: 8px 6px;
   margin: 0;
   text-align: center;
+}
+
+/* 后台奖品格子序号 */
+.gift-cell-wrap {
+  position: relative;
+}
+.gift-cell-wrap .gift-cell-num {
+  position: absolute;
+  top: -6px;
+  left: 2px;
+  font-size: 9px;
+  color: #999;
+  background: #fff;
+  padding: 0 3px;
+  line-height: 1.2;
+  z-index: 1;
+  border-radius: 3px;
 }
 
 .code-item {
@@ -1566,11 +1600,12 @@ function renderGrid() {
       const isLose = isLoseGift(giftText);
       if (isLose) cell.classList.add('lose');
       cell.innerHTML = `
+        <div class="cell-index">${i + 1}</div>
         <div class="gift">${giftText.trim() || '谢谢惠顾'}</div>
         ${poker ? `<div class="poker-tag">${poker}</div>` : ''}
       `;
     } else {
-      cell.innerHTML = '🎁';
+      cell.innerHTML = `<div class="cell-index">${i + 1}</div>🎁`;
       cell.onclick = () => pokeCell(i);
     }
     grid.appendChild(cell);
@@ -1584,12 +1619,19 @@ function renderGiftGrid() {
   grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   grid.innerHTML = '';
   for (let i = 0; i < currentData.rows * currentData.cols; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'gift-cell-wrap';
+    const num = document.createElement('span');
+    num.className = 'gift-cell-num';
+    num.textContent = i + 1;
     const input = document.createElement('input');
     input.type = 'text';
-    input.placeholder = `格${i+1}`;
+    input.placeholder = `奖品`;
     input.value = currentData.gifts[i] || '';
     input.oninput = () => setGift(i, input.value);
-    grid.appendChild(input);
+    wrap.appendChild(num);
+    wrap.appendChild(input);
+    grid.appendChild(wrap);
   }
 }
 
