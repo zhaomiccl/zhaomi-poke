@@ -1441,15 +1441,25 @@ function mergeData(local, server) {
     merged.pokedBy = server.pokedBy.map((v, i) => v || local.pokedBy[i] || '');
   }
   
-  // 口令次数：total 和 used 都取最大值（只增不减）
+  // 口令次数：total 和 used 都取最大值（只增不减），保留创建时间
   merged.codes = merged.codes || {};
   const localCodes = local.codes || {};
   for (const name in localCodes) {
     if (!merged.codes[name]) {
-      merged.codes[name] = { total: localCodes[name].total, used: localCodes[name].used || 0 };
+      merged.codes[name] = { 
+        total: localCodes[name].total, 
+        used: localCodes[name].used || 0,
+        createdAt: localCodes[name].createdAt || 0
+      };
     } else {
       merged.codes[name].total = Math.max(merged.codes[name].total, localCodes[name].total);
       merged.codes[name].used = Math.max(merged.codes[name].used || 0, localCodes[name].used || 0);
+      // 保留较早的创建时间
+      if (localCodes[name].createdAt) {
+        merged.codes[name].createdAt = merged.codes[name].createdAt 
+          ? Math.min(merged.codes[name].createdAt, localCodes[name].createdAt)
+          : localCodes[name].createdAt;
+      }
     }
   }
   
@@ -1638,7 +1648,12 @@ function renderGiftGrid() {
 function renderCodeList() {
   const list = document.getElementById('codeList');
   const codes = currentData.codes || {};
-  const names = Object.keys(codes);
+  // 按创建时间倒序（新的在前），没有时间戳的排到最后
+  const names = Object.keys(codes).sort((a, b) => {
+    const ta = codes[a].createdAt || 0;
+    const tb = codes[b].createdAt || 0;
+    return tb - ta;
+  });
   if (names.length === 0) {
     list.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px; font-size:13px;">暂无口令（所有人都可以戳）</p>';
     return;
@@ -1658,7 +1673,13 @@ function renderCodeList() {
 function renderLogList() {
   const list = document.getElementById('logList');
   const countEl = document.getElementById('logCount');
-  const logs = currentData.logs || [];
+  let logs = currentData.logs || [];
+  // 按时间倒序（新的在前）
+  logs = logs.slice().sort((a, b) => {
+    const ta = new Date(a.time).getTime() || 0;
+    const tb = new Date(b.time).getTime() || 0;
+    return tb - ta;
+  });
   countEl.textContent = `共 ${logs.length} 条记录`;
   if (logs.length === 0) {
     list.innerHTML = '<p style="color:#aaa; text-align:center; padding:30px; font-size:13px;">暂无戳奖记录</p>';
@@ -2527,7 +2548,7 @@ async function addCode() {
   if (!name || !count || count < 1) { showToast('请输入有效的口令和次数'); return; }
   if (!currentData.codes) currentData.codes = {};
   if (currentData.codes[name]) { showToast('该口令已存在'); return; }
-  currentData.codes[name] = { total: count, used: 0 };
+  currentData.codes[name] = { total: count, used: 0, createdAt: Date.now() };
   saveQueue = saveQueue.then(() => doSave('口令添加成功'));
   document.getElementById('newCodeName').value = '';
   document.getElementById('newCodeCount').value = '';
@@ -2556,7 +2577,7 @@ async function addCountToCode(name) {
   }
   
   if (!currentData.codes[name]) {
-    currentData.codes[name] = { total: add, used: 0 };
+    currentData.codes[name] = { total: add, used: 0, createdAt: Date.now() };
   } else {
     currentData.codes[name].total += add;
   }
