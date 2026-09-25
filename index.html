@@ -2266,7 +2266,7 @@ async function doPoke(index, code) {
     if (!data.codes[code]) { showToast('口令不正确'); return; }
     const remain = data.codes[code].total - data.codes[code].used;
     if (remain <= 0) { showToast('这个口令的次数已经用完啦'); return; }
-    data.codes[code].used++;
+    // 注意：used 不在此处递增，等确认格子归属后再消耗次数
   }
   
   data.opened[index] = true;
@@ -2299,7 +2299,46 @@ async function doPoke(index, code) {
     cell: index + 1
   };
   
-  saveQueue = saveQueue.then(() => doSave());
+  // 第一次保存：写入 opened/pokedBy/logs
+  await new Promise(resolve => {
+    saveQueue = saveQueue.then(() => doSave().then(resolve, resolve));
+  });
+  
+  // 保存后重新读取，确认格子归属权
+  let wonCell = false;
+  let serverData = null;
+  try {
+    const verify = await fetchServerData();
+    serverData = verify.data;
+    if (serverData.pokedBy && serverData.pokedBy[index] === (code || '匿名')) {
+      wonCell = true;
+    }
+  } catch (e) {
+    // 读取失败，假设成功
+    wonCell = true;
+  }
+  
+  if (!wonCell) {
+    // 被别人抢先了
+    showToast('这个格子被别人抢先戳开啦～');
+    // 重新渲染为服务端状态
+    if (serverData) {
+      currentData = serverData;
+      renderGrid();
+      updateStatusBar();
+    }
+    return;
+  }
+  
+  // 确认抢到格子后，再消耗口令次数（基于服务端最新 used 值）
+  if (code) {
+    const latestCodes = (serverData && serverData.codes) ? serverData.codes : currentData.codes;
+    if (latestCodes && latestCodes[code]) {
+      currentData = serverData || currentData;
+      currentData.codes[code].used = (currentData.codes[code].used || 0) + 1;
+      saveQueue = saveQueue.then(() => doSave());
+    }
+  }
   
   setTimeout(() => {
     const isLose = isLoseGift(gift);
