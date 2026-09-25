@@ -1373,22 +1373,86 @@ async function readData() {
   return getDefaultData();
 }
 
+// 读取服务端最新数据（原始内容）
+async function fetchServerData() {
+  const fileRes = await fetch(`${GITHUB_API}/data.json`, {
+    headers: {
+      'Authorization': 'Bearer ' + GITHUB_TOKEN,
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'poke-game'
+    }
+  });
+  if (!fileRes.ok) throw new Error('获取文件失败: ' + fileRes.status);
+  const fileInfo = await fileRes.json();
+  const content = decodeURIComponent(escape(atob(fileInfo.content)));
+  const data = JSON.parse(content);
+  return { data: normalizeData(data), sha: fileInfo.sha };
+}
+
+// 合并本地修改到服务端最新数据，避免并发覆盖
+function mergeData(local, server) {
+  const merged = JSON.parse(JSON.stringify(server));
+  
+  // 格子奖品：服务端为准（管理员修改不频繁）
+  merged.gifts = local.gifts && local.gifts.length === (merged.gifts || []).length 
+    ? local.gifts : (server.gifts || []);
+  
+  // 已戳开状态：取并集（任意一方打开就算打开）
+  if (local.opened && server.opened && local.opened.length === server.opened.length) {
+    merged.opened = local.opened.map((v, i) => v || server.opened[i]);
+  }
+  
+  // 戳奖人：服务端已有则保留，否则用本地的（先戳者为准）
+  if (local.pokedBy && server.pokedBy && local.pokedBy.length === server.pokedBy.length) {
+    merged.pokedBy = server.pokedBy.map((v, i) => v || local.pokedBy[i] || '');
+  }
+  
+  // 口令次数：total 和 used 都取最大值（只增不减）
+  merged.codes = merged.codes || {};
+  const localCodes = local.codes || {};
+  for (const name in localCodes) {
+    if (!merged.codes[name]) {
+      merged.codes[name] = { total: localCodes[name].total, used: localCodes[name].used || 0 };
+    } else {
+      merged.codes[name].total = Math.max(merged.codes[name].total, localCodes[name].total);
+      merged.codes[name].used = Math.max(merged.codes[name].used || 0, localCodes[name].used || 0);
+    }
+  }
+  
+  // 日志：合并去重
+  const serverLogs = server.logs || [];
+  const localLogs = local.logs || [];
+  const seen = new Set();
+  const mergedLogs = [];
+  for (const log of serverLogs.concat(localLogs)) {
+    const key = JSON.stringify(log);
+    if (!seen.has(key)) {
+      seen.add(key);
+      mergedLogs.push(log);
+    }
+  }
+  merged.logs = mergedLogs;
+  
+  // 尺寸和赞助文案：本地为准（管理员操作）
+  if (local.rows) merged.rows = local.rows;
+  if (local.cols) merged.cols = local.cols;
+  if (local.sponsorText !== undefined) merged.sponsorText = local.sponsorText;
+  
+  return normalizeData(merged);
+}
+
 async function writeData(data) {
-  // 最多重试3次，处理 SHA 冲突
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // 最多重试5次，处理 SHA 冲突，每次重新读取并合并
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      const fileRes = await fetch(`${GITHUB_API}/data.json`, {
-        headers: {
-          'Authorization': 'Bearer ' + GITHUB_TOKEN,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'poke-game'
-        }
-      });
-      if (!fileRes.ok) throw new Error('获取文件失败: ' + fileRes.status);
-      const fileInfo = await fileRes.json();
-      const sha = fileInfo.sha;
+      const { data: serverData, sha } = await fetchServerData();
       
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      // 冲突合并：将本地修改合并到服务端最新数据
+      const merged = mergeData(data, serverData);
+      // 同步回 currentData，保证本地状态与合并后一致
+      Object.assign(data, merged);
+      
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(merged))));
       const res = await fetch(`${GITHUB_API}/data.json`, {
         method: 'PUT',
         headers: {
@@ -1406,18 +1470,18 @@ async function writeData(data) {
       });
       
       if (res.status === 409) {
-        // SHA 冲突，重试
-        await new Promise(r => setTimeout(r, 500));
+        // SHA 冲突，退避后重试（指数退避）
+        await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
         continue;
       }
       
       if (!res.ok) throw new Error('写入失败: ' + res.status);
       
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch(e) {}
       return await res.json();
     } catch (e) {
-      if (attempt === 2) throw e;
-      await new Promise(r => setTimeout(r, 500));
+      if (attempt === 4) throw e;
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
     }
   }
 }
@@ -2401,7 +2465,20 @@ async function addCountToCode(name) {
   const add = parseInt(input.value);
   if (!add || add < 1) { showToast('请输入有效的次数'); return; }
   if (!currentData.codes[name]) { showToast('口令不存在'); return; }
-  currentData.codes[name].total += add;
+  
+  // 先从服务端读取最新次数，避免基于过期数据累加
+  try {
+    const { data: serverData } = await fetchServerData();
+    currentData = serverData;
+  } catch (e) {
+    console.warn('读取服务端数据失败，使用本地数据:', e);
+  }
+  
+  if (!currentData.codes[name]) {
+    currentData.codes[name] = { total: add, used: 0 };
+  } else {
+    currentData.codes[name].total += add;
+  }
   input.value = '';
   saveQueue = saveQueue.then(() => doSave(`已为"${name}"增加${add}次`));
   renderCodeList();
