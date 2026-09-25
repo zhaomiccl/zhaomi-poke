@@ -1742,9 +1742,8 @@ function generateSummaryPoster(winners) {
     ctx.fillStyle = '#ffd700';
     ctx.fillText(`${i + 1}.`, cardX + 130, y);
     
-    // 中奖人名字（左对齐）
-    let nameDisplay = w.code || '匿名';
-    if (nameDisplay.length > 8) nameDisplay = nameDisplay.substring(0, 8) + '…';
+    // 中奖人名字（左对齐，只显示口令前两个字）
+    let nameDisplay = w.code ? getDisplayCode(w.code) : '匿名';
     ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.fillText(nameDisplay, cardX + 170, y);
@@ -1948,7 +1947,7 @@ function generatePoster(index) {
   ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.fillText(`中奖人：${prize.code}`, W/2, cardY + 270);
+  ctx.fillText(`中奖人：${prize.code ? getDisplayCode(prize.code) : '匿名'}`, W/2, cardY + 270);
   ctx.restore();
   
   ctx.save();
