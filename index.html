@@ -1859,13 +1859,13 @@ function generateSummaryPoster(winners) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.fillText(nameDisplay, cardX + 170, y);
     
-    // 奖品名（左对齐）
+    // 奖品名（左对齐，偏中间）
     let prizeDisplay = w.gift || '神秘奖品';
     if (prizeDisplay.length > 10) prizeDisplay = prizeDisplay.substring(0, 10) + '…';
     ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = 'rgba(255, 200, 200, 0.8)';
     ctx.textAlign = 'left';
-    ctx.fillText(prizeDisplay, cardX + 400, y);
+    ctx.fillText(prizeDisplay, cardX + 290, y);
   });
   ctx.restore();
   
