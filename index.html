@@ -565,15 +565,16 @@ body::before {
 .gift-input-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin: 10px 0;
+  gap: 4px;
+  margin: 8px 0;
 }
 
 .gift-input-grid input {
   width: 100%;
   font-size: 11px;
-  padding: 8px 6px;
+  padding: 6px 4px;
   margin: 0;
+  border-radius: 10px;
   text-align: center;
 }
 
@@ -598,9 +599,9 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
+  padding: 5px 10px;
   background: linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
-  border-radius: 8px;
+  border-radius: 999px;
   margin: 3px 0;
   border: 1px solid rgba(0,0,0,0.05);
   flex-wrap: nowrap;
@@ -657,29 +658,29 @@ body::before {
 /* 管理员标签页 */
 .admin-tabs {
   display: flex;
-  gap: 4px;
-  margin-bottom: 15px;
+  gap: 3px;
+  margin-bottom: 12px;
   background: rgba(0,0,0,0.05);
-  padding: 4px;
-  border-radius: 12px;
+  padding: 3px;
+  border-radius: 999px;
 }
 
 .admin-tab {
   flex: 1;
-  padding: 8px 10px;
+  padding: 7px 6px;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s;
+  border-radius: 999px;
+  transition: all 0.25s;
   font-weight: 500;
 }
 
 .admin-tab.active {
   background: white;
   color: #dc2430;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .admin-tab-content {
@@ -689,6 +690,124 @@ body::before {
 .admin-tab-content.active {
   display: block;
   animation: fadeIn 0.3s ease;
+}
+
+/* ====== 管理员面板：圆润紧凑 ====== */
+.admin-panel {
+  padding: 18px 16px 16px;
+  border-radius: 28px;
+  max-width: 420px;
+}
+
+.admin-panel h2 {
+  font-size: 16px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.admin-panel input,
+.admin-panel textarea {
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+.admin-panel textarea {
+  resize: vertical;
+  min-height: 76px;
+  line-height: 1.5;
+}
+
+.admin-panel button {
+  padding: 7px 14px;
+  margin: 3px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+}
+
+.admin-h3 {
+  margin: 6px 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.admin-hint {
+  font-size: 11px;
+  color: #aaa;
+  line-height: 1.5;
+}
+
+.code-input-box {
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
+  margin-bottom: 8px;
+}
+
+.code-input-box textarea {
+  width: 100%;
+  margin: 0;
+  background: rgba(255,255,255,0.9);
+}
+
+.code-input-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.admin-panel .btn-soft {
+  background: linear-gradient(135deg, #ffa500, #ffb733);
+  box-shadow: 0 3px 10px rgba(255,165,0,0.25);
+}
+
+.admin-panel .btn-danger {
+  background: linear-gradient(135deg, #ff6b6b, #ff8787);
+  box-shadow: 0 3px 10px rgba(255,107,107,0.28);
+}
+
+.admin-panel .btn-ghost {
+  background: linear-gradient(135deg, #aaa, #bbb);
+  box-shadow: none;
+}
+
+/* 覆盖通用 input/button 规则，保持后台列表紧凑 */
+.admin-panel .gift-input-grid input {
+  padding: 6px 4px;
+  font-size: 11px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.admin-panel .size-control input {
+  width: 52px;
+  padding: 6px 6px;
+  text-align: center;
+}
+
+.admin-panel .code-item button {
+  padding: 4px 9px;
+  margin: 0 0 0 2px;
+  font-size: 11px;
+  border-radius: 999px;
+}
+
+.admin-panel .code-item button.btn-add {
+  padding: 4px 9px;
 }
 
 /* 日志列表 */
@@ -702,10 +821,10 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
-  border-radius: 10px;
-  margin: 5px 0;
+  border-radius: 14px;
+  margin: 4px 0;
   border: 1px solid rgba(0,0,0,0.05);
   gap: 10px;
 }
@@ -1160,7 +1279,7 @@ body::before {
 
 <!-- 管理员面板 -->
 <div class="modal" id="adminModal">
-  <div class="modal-content">
+  <div class="modal-content admin-panel">
     <h2>🎛 管理员面板</h2>
     <div class="admin-tabs">
       <div class="admin-tab active" onclick="switchAdminTab('gifts')">🎁 奖品</div>
@@ -1182,37 +1301,40 @@ body::before {
         <input type="number" id="colsInput" min="1" max="10" value="5">
         <button onclick="setSize()">应用</button>
       </div>
-      <h3 style="font-size:15px; color:#555; margin-top:15px; font-weight:500;">设置奖品</h3>
+      <h3 class="admin-h3">设置奖品</h3>
       <div class="gift-input-grid" id="giftGrid"></div>
     </div>
     
     <!-- 口令管理 -->
     <div class="admin-tab-content" id="tabCodes">
-      <h3 style="font-size:15px; color:#555; margin-top:5px; font-weight:500;">口令管理</h3>
-      <div style="display:flex; gap:8px; margin:10px 0;">
-        <input type="text" id="newCodeName" placeholder="口令名称" style="flex:1;">
-        <input type="number" id="newCodeCount" placeholder="次数" style="width:70px;">
-        <button onclick="addCode()">添加</button>
+      <h3 class="admin-h3">🔑 口令管理</h3>
+      <div class="code-input-box">
+        <textarea id="newCodeInput" rows="3" placeholder="每行一条，例如：&#10;某某123，5次&#10;小渔001 3&#10;名称和次数之间可用任意符号分隔"></textarea>
+        <div class="code-input-foot">
+          <span class="admin-hint">格式：名称 + 任意分隔符 + 次数</span>
+          <button onclick="addCodes()">批量添加</button>
+        </div>
       </div>
       <div class="code-list" id="codeList"></div>
     </div>
     
     <!-- 戳奖日志 -->
     <div class="admin-tab-content" id="tabLogs">
-      <h3 style="font-size:15px; color:#555; margin-top:5px; font-weight:500;">戳奖日志</h3>
+      <h3 class="admin-h3">📋 戳奖日志</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0;">
-        <span style="font-size:12px; color:#999;" id="logCount">共 0 条记录</span>
-        <button onclick="clearLogs()" style="padding:6px 14px; font-size:12px; background: linear-gradient(135deg, #ffa500, #ffb733); box-shadow: 0 2px 8px rgba(255,165,0,0.3);">清空日志</button>
+        <span class="admin-hint" id="logCount">共 0 条记录</span>
+        <button class="btn-soft" onclick="clearLogs()">清空日志</button>
       </div>
       <div class="log-list" id="logList"></div>
     </div>
     
-    <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
-      <button onclick="clearProgress()" style="background: linear-gradient(135deg, #ffa500, #ffb733); box-shadow: 0 4px 15px rgba(255,165,0,0.3);">清空记录</button>
-      <button onclick="resetAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff8787); box-shadow: 0 4px 15px rgba(255,107,107,0.3);">重置所有</button>
-      <button onclick="closeModal('adminModal')" style="background: linear-gradient(135deg, #aaa, #bbb); box-shadow: none;">关闭</button>
+    <div class="admin-actions">
+      <button class="btn-soft" onclick="clearAllCodes()">清空口令</button>
+      <button class="btn-soft" onclick="restorePokes()">恢复戳奖</button>
+      <button class="btn-danger" onclick="resetPrizes()">重置奖品</button>
+      <button class="btn-ghost" onclick="closeModal('adminModal')">关闭</button>
     </div>
-    <p style="margin-top:15px; font-size:11px; color:#aaa; text-align:center;">
+    <p class="admin-hint" style="margin-top:10px; text-align:center;">
       修改数据后刷新页面即可看到最新效果
     </p>
   </div>
@@ -2542,17 +2664,57 @@ async function setSize() {
   renderGrid();
 }
 
-async function addCode() {
-  const name = document.getElementById('newCodeName').value.trim();
-  const count = parseInt(document.getElementById('newCodeCount').value);
-  if (!name || !count || count < 1) { showToast('请输入有效的口令和次数'); return; }
+// 解析单行口令：如「某某123，5次」「小渔001 3」，分隔符可用任意符号
+function parseCodeLine(line) {
+  const text = line.trim();
+  if (!text) return null;
+  // 行尾数字视为次数，且它前面必须紧跟分隔符或空格，否则算作名称的一部分
+  const m = text.match(/([0-9]+)\s*(?:次)?\s*$/);
+  const before = m ? text.slice(0, m.index) : '';
+  if (!m || !/[，,、;；:：|/\\~·\-\s]$/u.test(before)) {
+    return { name: text, count: 1 };
+  }
+  const name = before.replace(/[，,、;；:：|/\\~·\-\s]+$/u, '').trim();
+  const count = parseInt(m[1], 10);
+  if (!name || !count || count < 1) return null;
+  return { name, count };
+}
+
+async function addCodes() {
+  const el = document.getElementById('newCodeInput');
+  const raw = el.value.trim();
+  if (!raw) { showToast('请输入口令'); return; }
   if (!currentData.codes) currentData.codes = {};
-  if (currentData.codes[name]) { showToast('该口令已存在'); return; }
-  currentData.codes[name] = { total: count, used: 0, createdAt: Date.now() };
-  saveQueue = saveQueue.then(() => doSave('口令添加成功'));
-  document.getElementById('newCodeName').value = '';
-  document.getElementById('newCodeCount').value = '';
+
+  let added = 0, merged = 0;
+  const failed = [];
+  raw.split(/\n+/).map(l => l.trim()).filter(Boolean).forEach(line => {
+    const parsed = parseCodeLine(line);
+    if (!parsed) { failed.push(line); return; }
+    const { name, count } = parsed;
+    if (currentData.codes[name]) {
+      // 已存在的口令累加次数
+      currentData.codes[name].total += count;
+      merged++;
+    } else {
+      currentData.codes[name] = { total: count, used: 0, createdAt: Date.now() };
+      added++;
+    }
+  });
+
   renderCodeList();
+  if (!added && !merged) {
+    showToast(failed.length ? `格式不正确：${failed[0]}` : '未识别到有效口令', 2600);
+    return;
+  }
+
+  el.value = '';
+  const parts = [];
+  if (added) parts.push(`新增 ${added} 个`);
+  if (merged) parts.push(`追加 ${merged} 个`);
+  if (failed.length) parts.push(`跳过 ${failed.length} 行`);
+  showToast(parts.join(' · '), 2400);
+  saveQueue = saveQueue.then(() => doSave('口令已保存'));
 }
 
 async function delCode(name) {
@@ -2593,24 +2755,44 @@ async function clearLogs() {
   renderLogList();
 }
 
-async function clearProgress() {
-  if (!confirm('确定清空所有戳奖记录吗？')) return;
-  currentData.opened = new Array(currentData.rows * currentData.cols).fill(false);
-  currentData.pokedBy = new Array(currentData.rows * currentData.cols).fill('');
+// 清空口令：删除所有已添加的口令
+async function clearAllCodes() {
+  if (!currentData.codes || !Object.keys(currentData.codes).length) {
+    showToast('当前没有口令');
+    return;
+  }
+  if (!confirm('确定清空所有已添加的口令吗？\n清空后玩家无需口令即可直接戳格子。')) return;
+  currentData.codes = {};
+  saveQueue = saveQueue.then(() => doSave('口令已清空'));
+  renderCodeList();
+}
+
+// 恢复戳奖：所有格子回到未戳状态
+async function restorePokes() {
+  if (!confirm('确定把所有格子恢复到未戳状态吗？\n奖品不变，口令使用次数会清零，日志保留。')) return;
+  const total = currentData.rows * currentData.cols;
+  currentData.opened = new Array(total).fill(false);
+  currentData.pokedBy = new Array(total).fill('');
   if (currentData.codes) {
     for (const name in currentData.codes) currentData.codes[name].used = 0;
   }
-  saveQueue = saveQueue.then(() => doSave('已清空'));
+  saveQueue = saveQueue.then(() => doSave('已恢复未戳状态'));
   renderGrid();
+  renderCodeList();
   updateStatusBar();
 }
 
-function resetAll() {
-  if (!confirm('确定重置所有数据吗？奖品、口令和日志都会清空！')) return;
-  currentData = getDefaultData();
-  saveQueue = saveQueue.then(() => doSave('已重置'));
-  document.getElementById('rowsInput').value = currentData.rows;
-  document.getElementById('colsInput').value = currentData.cols;
+// 重置奖品：奖品、口令、戳奖记录全部重置（需二次确认）
+async function resetPrizes() {
+  if (!confirm('确定重置奖品吗？奖品、口令、戳奖记录都会被清空。')) return;
+  if (!confirm('再次确认：此操作不可恢复！\n确定要清空全部奖品、口令和戳奖记录吗？')) return;
+  const total = currentData.rows * currentData.cols;
+  currentData.gifts = new Array(total).fill('');
+  currentData.opened = new Array(total).fill(false);
+  currentData.pokedBy = new Array(total).fill('');
+  currentData.codes = {};
+  currentData.logs = [];
+  saveQueue = saveQueue.then(() => doSave('奖品已重置'));
   renderGrid();
   renderGiftGrid();
   renderCodeList();
