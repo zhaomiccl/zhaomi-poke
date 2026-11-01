@@ -1607,15 +1607,21 @@ function mergeData(local, server) {
   return normalizeData(merged);
 }
 
-async function writeData(data) {
+async function writeData(data, forceFields = null) {
   // 最多重试5次，处理 SHA 冲突，每次重新读取并合并
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const { data: serverData, sha } = await fetchServerData();
       
-      // 冲突合并：将本地修改合并到服务端最新数据
+      // 先做常规合并，再把管理端要覆盖的字段强制替换为本地值
+      // （删除/清空类操作不能被 mergeData 的并集逻辑补回来）
       const merged = mergeData(data, serverData);
-      // 同步回 currentData，保证本地状态与合并后一致
+      if (forceFields) {
+        forceFields.forEach(key => {
+          merged[key] = JSON.parse(JSON.stringify(data[key]));
+        });
+      }
+      // 同步回 currentData，保证本地状态与写入后一致
       Object.assign(data, merged);
       
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(merged))));
@@ -2620,9 +2626,9 @@ function setSponsorText(text) {
   }, 800);
 }
 
-async function doSave(successMsg = '已保存') {
+async function doSave(successMsg = '已保存', forceFields = null) {
   try {
-    await writeData(currentData);
+    await writeData(currentData, forceFields);
     showToast(successMsg);
   } catch (e) {
     showToast('保存失败，请稍后重试');
@@ -2659,7 +2665,7 @@ async function setSize() {
   currentData.gifts = newGifts;
   currentData.opened = newOpened;
   currentData.pokedBy = newPokedBy;
-  saveQueue = saveQueue.then(() => doSave('尺寸已更新'));
+  saveQueue = saveQueue.then(() => doSave('尺寸已更新', ['rows', 'cols', 'gifts', 'opened', 'pokedBy']));
   renderGiftGrid();
   renderGrid();
 }
@@ -2720,7 +2726,7 @@ async function addCodes() {
 async function delCode(name) {
   if (!confirm(`确定删除口令"${name}"吗？`)) return;
   delete currentData.codes[name];
-  saveQueue = saveQueue.then(() => doSave('已删除'));
+  saveQueue = saveQueue.then(() => doSave('已删除', ['codes']));
   renderCodeList();
 }
 
@@ -2751,7 +2757,7 @@ async function addCountToCode(name) {
 async function clearLogs() {
   if (!confirm('确定清空所有戳奖日志吗？此操作不可恢复。')) return;
   currentData.logs = [];
-  saveQueue = saveQueue.then(() => doSave('日志已清空'));
+  saveQueue = saveQueue.then(() => doSave('日志已清空', ['logs']));
   renderLogList();
 }
 
@@ -2763,7 +2769,7 @@ async function clearAllCodes() {
   }
   if (!confirm('确定清空所有已添加的口令吗？\n清空后玩家无需口令即可直接戳格子。')) return;
   currentData.codes = {};
-  saveQueue = saveQueue.then(() => doSave('口令已清空'));
+  saveQueue = saveQueue.then(() => doSave('口令已清空', ['codes']));
   renderCodeList();
 }
 
@@ -2776,7 +2782,7 @@ async function restorePokes() {
   if (currentData.codes) {
     for (const name in currentData.codes) currentData.codes[name].used = 0;
   }
-  saveQueue = saveQueue.then(() => doSave('已恢复未戳状态'));
+  saveQueue = saveQueue.then(() => doSave('已恢复未戳状态', ['opened', 'pokedBy', 'codes']));
   renderGrid();
   renderCodeList();
   updateStatusBar();
@@ -2792,7 +2798,7 @@ async function resetPrizes() {
   currentData.pokedBy = new Array(total).fill('');
   currentData.codes = {};
   currentData.logs = [];
-  saveQueue = saveQueue.then(() => doSave('奖品已重置'));
+  saveQueue = saveQueue.then(() => doSave('奖品已重置', ['gifts', 'opened', 'pokedBy', 'codes', 'logs']));
   renderGrid();
   renderGiftGrid();
   renderCodeList();
